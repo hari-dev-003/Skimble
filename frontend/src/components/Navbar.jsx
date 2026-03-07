@@ -10,16 +10,17 @@ const Navbar = ({ onFavouritesClick }) => {
     const auth = useAuth();
     // Signout function to redirect to Cognito logout
    const signOutRedirect = () => {
-    const clientId = "43eurrtnocbfacncase6lkevk5";
-    const logoutUri = "http://localhost:5173"; // Ensure this matches your redirect URI in Cognito
-    const cognitoDomain = "https://ap-south-1gtsmszjqq.auth.ap-south-1.amazoncognito.com";
+    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+    const logoutUri = import.meta.env.VITE_COGNITO_REDIRECT_URI;
+    const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
     window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   };
 
     // Fetch notes and favorites count from the backend or state management
+    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
     const fetchNotesAndFavoritesCount = async () => {
-        axios.get('http://localhost:3000/api/details/')
+        axios.get(`${BACKEND_URL}/api/details/`)
             .then(response => {
                 setNotesNumber(response.data.length);
                 const favoritesCount = response.data.filter(note => note.favourite).length;
