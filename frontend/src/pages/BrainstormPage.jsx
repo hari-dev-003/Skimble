@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
 import axios from 'axios';
-import { Palette, Plus, Users, Clock, Trash2, AlertCircle } from 'lucide-react';
+import { Palette, Plus, Users, Clock, Trash2, AlertCircle, Sparkles, Layout, Zap, Share2 } from 'lucide-react';
 import { useSession } from '../context/SessionContext';
+import { motion } from 'framer-motion';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -60,58 +61,68 @@ const BrainstormPage = () => {
 
   if (restoring) {
     return (
-      <div className="min-h-full flex items-center justify-center">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-gray-400">Loading session…</p>
+      <div className="min-h-full flex items-center justify-center bg-slate-50">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-10 h-10 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs font-black uppercase tracking-widest text-slate-400">Syncing Workspace…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-full p-8 max-w-2xl mx-auto">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg">
-          <Palette className="w-6 h-6 text-white" />
+    <div className="min-h-full p-8 max-w-2xl mx-auto bg-slate-50 font-['Outfit']">
+      <div className="flex items-center gap-4 mb-10">
+        <div className="w-12 h-12 bg-[#0f172a] rounded-2xl flex items-center justify-center shadow-lg shadow-slate-200">
+          <Layout className="w-6 h-6 text-cyan-400" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Brainstorm Session</h1>
-          <p className="text-gray-500 text-sm">Create a collaborative whiteboard for your team</p>
+          <h1 className="text-[36px] font-[650] text-slate-900 tracking-tighter capitalize leading-none">Brainstorm Studio</h1>
+          <p className="text-slate-500 text-sm font-medium mt-1">Infinite canvas for real-time team collaboration</p>
         </div>
       </div>
 
       {error && (
-        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl mb-6 text-red-700">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-xl mb-8 text-red-700"
+        >
           <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
-          <span className="text-sm">{error}</span>
-        </div>
+          <span className="text-sm font-bold">{error}</span>
+        </motion.div>
       )}
 
       {activeSession ? (
-        /* Active session card */
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          <div className="bg-gradient-to-r from-purple-500 to-blue-500 p-6 text-white">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-white/80">Active Session</span>
-              <span className="text-xs bg-white/20 px-2 py-0.5 rounded-full">Live</span>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-[2rem] border border-slate-200 shadow-premium overflow-hidden"
+        >
+          <div className="bg-[#0f172a] p-8 text-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/10 blur-3xl rounded-full translate-x-10 -translate-y-10" />
+            <div className="flex items-center justify-between mb-4 relative z-10">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">Active Live Session</span>
+              <span className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-widest bg-cyan-500/20 text-cyan-300 px-2.5 py-1 rounded-lg">
+                <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" /> Live
+              </span>
             </div>
-            <div className="flex items-baseline gap-3">
-              <span className="text-4xl font-mono font-bold tracking-widest">{activeSession.code}</span>
+            <div className="relative z-10 flex items-baseline gap-4">
+              <span className="text-5xl font-black tracking-tighter uppercase">{activeSession.code}</span>
             </div>
-            <p className="text-white/70 text-sm mt-1">Share this code with collaborators</p>
+            <p className="text-slate-400 text-xs font-bold mt-2 relative z-10">Share this unique identifier with your team</p>
           </div>
 
-          <div className="p-6 space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Users className="w-4 h-4 text-gray-400" />
-                <span>Collaborative whiteboard</span>
+          <div className="p-8 space-y-6">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3 text-xs font-bold text-slate-600">
+                <Users className="w-4 h-4 text-cyan-600" />
+                <span>Synchronized Multi-User Whiteboard</span>
               </div>
               {activeSession.expiresAt && (
-                <div className="flex items-center gap-2 text-sm text-gray-600">
-                  <Clock className="w-4 h-4 text-gray-400" />
-                  <span>Expires {formatExpiry(activeSession.expiresAt)}</span>
+                <div className="flex items-center gap-3 text-xs font-bold text-slate-600">
+                  <Clock className="w-4 h-4 text-cyan-600" />
+                  <span>Available until {formatExpiry(activeSession.expiresAt)}</span>
                 </div>
               )}
             </div>
@@ -119,64 +130,66 @@ const BrainstormPage = () => {
             <div className="flex gap-3 pt-2">
               <button
                 onClick={() => navigate(`/whiteboard/${activeSession.code}`)}
-                className="flex-1 py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-purple-200 transition-all duration-200"
+                className="flex-1 py-4 bg-cyan-600 text-white font-black uppercase tracking-widest text-xs rounded-2xl hover:bg-cyan-500 hover:shadow-xl hover:shadow-cyan-200 transition-all duration-300"
               >
-                Open Whiteboard
+                Enter Studio
               </button>
               {activeSession.isHost && (
                 <button
                   onClick={handleEndSession}
                   disabled={ending}
-                  className="flex items-center gap-2 px-4 py-3 bg-red-50 text-red-600 border border-red-200 font-medium rounded-xl hover:bg-red-100 transition-all duration-200 disabled:opacity-50"
+                  className="flex items-center justify-center w-14 h-14 bg-red-50 text-red-600 border border-red-100 rounded-2xl hover:bg-red-100 transition-all duration-300 disabled:opacity-50"
+                  title="End Session"
                 >
-                  <Trash2 className="w-4 h-4" />
-                  {ending ? 'Ending…' : 'End'}
+                  <Trash2 className="w-5 h-5" />
                 </button>
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
       ) : (
-        /* Create new session */
-        <div className="space-y-6">
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 text-center">
-            <div className="w-20 h-20 bg-gradient-to-br from-purple-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <Plus className="w-10 h-10 text-purple-500" />
+        <div className="space-y-8">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-white rounded-[2.5rem] border border-slate-200 shadow-premium p-10 text-center relative overflow-hidden group"
+          >
+            <div className="w-20 h-20 bg-slate-50 border border-slate-100 rounded-[2rem] flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-105 transition-transform duration-500">
+              <Plus className="w-10 h-10 text-cyan-600" strokeWidth={3} />
             </div>
-            <h2 className="text-xl font-bold text-gray-800 mb-2">Start a New Session</h2>
-            <p className="text-gray-500 text-sm mb-6 max-w-sm mx-auto">
-              Create a whiteboard session and share the 6-character code with your team to collaborate in real time.
+            <h2 className="text-[33px] font-[650] text-slate-900 mb-2 tracking-tighter capitalise">New Collaboration</h2>
+            <p className="text-slate-500 text-sm mb-8 max-w-sm mx-auto font-medium leading-relaxed">
+              Instantly launch a professional whiteboard session. Invite collaborators with a secure 6-character access code.
             </p>
             <button
               onClick={handleCreateSession}
               disabled={creating}
-              className="inline-flex items-center gap-2 px-8 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-purple-200 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="group relative inline-flex items-center gap-3 px-10 py-5 bg-[#0f172a] text-white text-[11px] font-black uppercase tracking-[0.2em] rounded-2xl hover:bg-cyan-600 transition-all duration-500 shadow-xl hover:shadow-cyan-200 disabled:opacity-50"
             >
               {creating ? (
                 <>
-                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Creating…
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Initializing…
                 </>
               ) : (
                 <>
-                  <Plus className="w-5 h-5" />
-                  Create Session
+                  <Sparkles size={16} className="text-cyan-400 group-hover:text-white" />
+                  Launch Session
                 </>
               )}
             </button>
-          </div>
+          </motion.div>
 
-          {/* Feature highlights */}
           <div className="grid grid-cols-3 gap-4">
             {[
-              { icon: '🎨', title: 'Rich Canvas', desc: 'Shapes, text, freehand drawing with full styling' },
-              { icon: '⚡', title: 'Real-Time', desc: 'See collaborator changes and cursors instantly' },
-              { icon: '🔗', title: 'Easy Share', desc: '6-char code — no sign-up needed for guests' },
+              { icon: <Palette size={20}/>, title: 'Rich Tools', desc: 'Precise vectors & text' },
+              { icon: <Zap size={20}/>, title: 'No Latency', desc: 'Instant sync engine' },
+              { icon: <Share2 size={20}/>, title: 'Zero Friction', desc: 'One-click guest join' },
             ].map(({ icon, title, desc }) => (
-              <div key={title} className="bg-white rounded-xl border border-gray-200 p-4 text-center">
-                <div className="text-2xl mb-2">{icon}</div>
-                <h3 className="text-sm font-semibold text-gray-800 mb-1">{title}</h3>
-                <p className="text-xs text-gray-500">{desc}</p>
+              <div key={title} className="bg-white rounded-2xl border border-slate-200 p-5 text-center shadow-sm hover:border-cyan-200 transition-all group">
+                <div className="text-cyan-600 mb-3 flex justify-center group-hover:scale-110 transition-transform">{icon}</div>
+                <h3 className="text-[10px] font-black text-slate-900 mb-1 uppercase tracking-widest">{title}</h3>
+                <p className="text-[10px] text-slate-400 font-bold leading-tight">{desc}</p>
               </div>
             ))}
           </div>

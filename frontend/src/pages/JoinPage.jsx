@@ -1,8 +1,9 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { LogIn, AlertCircle, ArrowRight } from 'lucide-react';
+import { LogIn, AlertCircle, ArrowRight, KeyRound } from 'lucide-react';
 import { useSession } from '../context/SessionContext';
+import { motion } from 'framer-motion';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
@@ -66,24 +67,30 @@ const JoinPage = () => {
   };
 
   return (
-    <div className="min-h-full flex items-center justify-center p-8">
+    <div className="min-h-full flex items-center justify-center p-8 bg-slate-50">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <LogIn className="w-8 h-8 text-white" />
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-10"
+        >
+          <div className="w-16 h-16 bg-[#0f172a] rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-slate-200">
+            <KeyRound className="w-8 h-8 text-cyan-400" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Join Brainstorm Session</h1>
-          <p className="text-gray-500 text-sm">Enter the 6-character code shared by the session host</p>
-        </div>
+          <h1 className="text-3xl font-[700] text-slate-900 tracking-tighter">Access Workspace</h1>
+          <p className="text-slate-500 text-sm font-medium mt-2">Enter your team's unique 6-character session code</p>
+        </motion.div>
 
         {/* Code input */}
-        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-8">
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4 text-center">
-            Session Code
-          </label>
-
-          <div className="flex gap-2 justify-center mb-6">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.98 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="bg-white rounded-[2.5rem] border border-slate-200 shadow-premium p-10 relative overflow-hidden"
+        >
+          <div className="absolute top-0 left-0 w-full h-1 bg-cyan-500/20" />
+          
+          <div className="flex gap-2 justify-center mb-10">
             {code.map((char, i) => (
               <input
                 key={i}
@@ -94,10 +101,10 @@ const JoinPage = () => {
                 onChange={e => handleDigitChange(i, e.target.value)}
                 onKeyDown={e => handleKeyDown(i, e)}
                 onPaste={handlePaste}
-                className={`w-12 h-14 text-center text-xl font-mono font-bold border-2 rounded-xl transition-all duration-150 focus:outline-none
+                className={`w-12 h-16 text-center text-2xl font-black border-2 rounded-2xl transition-all duration-300 focus:outline-none uppercase tracking-tighter
                   ${char
-                    ? 'border-purple-400 bg-purple-50 text-purple-800'
-                    : 'border-gray-200 bg-gray-50 text-gray-900 focus:border-purple-400 focus:bg-purple-50'
+                    ? 'border-cyan-500 bg-cyan-50/30 text-cyan-700 shadow-inner'
+                    : 'border-slate-100 bg-slate-50 text-slate-900 focus:border-cyan-400 focus:bg-white focus:shadow-lg focus:shadow-cyan-100'
                   }`}
                 autoFocus={i === 0}
               />
@@ -105,34 +112,36 @@ const JoinPage = () => {
           </div>
 
           {error && (
-            <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mb-4 text-red-700">
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="flex items-start gap-2 p-4 bg-red-50 border border-red-100 rounded-2xl mb-6 text-red-700 overflow-hidden"
+            >
               <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
-              <span className="text-sm">{error}</span>
-            </div>
+              <span className="text-xs font-bold">{error}</span>
+            </motion.div>
           )}
 
           <button
             onClick={handleJoin}
             disabled={joining || codeString.length < 6}
-            className="w-full flex items-center justify-center gap-2 py-4 bg-gradient-to-r from-purple-500 to-blue-500 text-white font-semibold rounded-xl hover:shadow-xl hover:shadow-purple-200 transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+            className="shimmer-btn group w-full flex items-center justify-center gap-3 py-5 bg-[#0f172a] text-white text-xs font-black uppercase tracking-[0.2em] rounded-2xl transition-all duration-500 hover:scale-105 active:scale-[0.95] disabled:opacity-50 disabled:bg-slate-200 disabled:scale-100 z-10"
           >
             {joining ? (
-              <>
-                <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                Joining…
-              </>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>
-                Join Session
-                <ArrowRight className="w-5 h-5" />
+                <span>Secure Join</span>
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" strokeWidth={3} />
               </>
             )}
           </button>
 
-          <p className="text-center text-xs text-gray-400 mt-4">
-            Ask your team host for the session code
-          </p>
-        </div>
+          <div className="mt-8 pt-8 border-t border-slate-50 flex items-center justify-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full bg-cyan-500" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Authorized Access Only</span>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

@@ -1,19 +1,31 @@
-import { MousePointer2, Square, Circle, Minus, MoveRight, Type, Pen, Eraser, Undo2, Redo2, Trash2 } from 'lucide-react';
+import { 
+  MousePointer2, 
+  Square, 
+  Circle, 
+  Minus, 
+  MoveRight, 
+  Type, 
+  Pen, 
+  Eraser, 
+  Undo2, 
+  Redo2, 
+  Trash2,
+  ChevronUp,
+  Palette,
+  Layers
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 
 const TOOLS = [
   { id: 'select', icon: MousePointer2, label: 'Select (V)' },
+  { id: 'pen', icon: Pen, label: 'Pen (P)' },
   { id: 'rect', icon: Square, label: 'Rectangle (R)' },
   { id: 'circle', icon: Circle, label: 'Circle (C)' },
   { id: 'line', icon: Minus, label: 'Line (L)' },
   { id: 'arrow', icon: MoveRight, label: 'Arrow (A)' },
   { id: 'text', icon: Type, label: 'Text (T)' },
-  { id: 'pen', icon: Pen, label: 'Pen (P)' },
   { id: 'eraser', icon: Eraser, label: 'Eraser (E)' },
-];
-
-const PRESET_COLORS = [
-  '#1a1a1a', '#EF4444', '#F59E0B', '#10B981',
-  '#3B82F6', '#8B5CF6', '#EC4899', '#ffffff',
 ];
 
 const WhiteboardToolbar = ({
@@ -27,113 +39,145 @@ const WhiteboardToolbar = ({
   canUndo,
   canRedo,
 }) => {
-  return (
-    <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 flex items-center gap-1 bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/50 p-1.5 select-none max-w-[95vw] overflow-x-auto no-scrollbar">
-      {/* Tool buttons */}
-      <div className="flex items-center gap-1 pr-1 border-r border-gray-200/80">
-        {TOOLS.map(({ id, icon: Icon, label }) => (
-          <button
-            key={id}
-            onClick={() => setTool(id)}
-            title={label}
-            className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center transition-all duration-150 shrink-0
-              ${tool === id
-                ? 'bg-gradient-to-br from-purple-500 to-blue-500 text-white shadow-md shadow-purple-200'
-                : 'text-gray-500 hover:bg-gray-100/80 hover:text-gray-800'
-              }`}
-          >
-            <Icon className="w-4 h-4" />
-          </button>
-        ))}
-      </div>
+  const [showProperties, setShowProperties] = useState(false);
 
-      {/* Property controls - only show relevant ones or group them */}
-      <div className="flex items-center gap-3 px-3">
-        {/* Stroke / Fill Color Pickers */}
-        <div className="flex items-center gap-2">
-          <div className="flex flex-col items-center">
-            <input
-              type="color"
-              value={toolProps.stroke}
-              onChange={e => setToolProps(p => ({ ...p, stroke: e.target.value }))}
-              className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg cursor-pointer border border-gray-200 p-0 bg-white"
-              title="Stroke color"
-            />
-          </div>
-          {tool !== 'pen' && tool !== 'line' && tool !== 'arrow' && (
-            <div className="flex flex-col items-center">
+  return (
+    <div className="fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-3 sm:gap-4 w-[95vw] sm:w-auto">
+      {/* Properties Popover (Contextual) */}
+      <AnimatePresence>
+        {showProperties && (
+          <motion.div
+            initial={{ opacity: 0, y: 10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            className="glass-panel rounded-2xl sm:rounded-3xl p-3 sm:p-4 flex items-center gap-4 sm:gap-6 shadow-premium mb-1 sm:mb-2 border-white/40 max-w-full overflow-x-auto no-scrollbar"
+          >
+            {/* Color Pickers */}
+            <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+              <div className="flex flex-col gap-1">
+                <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 text-center sm:text-left">Stroke</span>
+                <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border-2 border-white shadow-sm cursor-pointer mx-auto sm:mx-0">
+                  <input
+                    type="color"
+                    value={toolProps.stroke}
+                    onChange={e => setToolProps(p => ({ ...p, stroke: e.target.value }))}
+                    className="absolute inset-0 w-full h-full scale-150 cursor-pointer"
+                  />
+                </div>
+              </div>
+              
+              {tool !== 'pen' && tool !== 'line' && tool !== 'arrow' && (
+                <div className="flex flex-col gap-1">
+                  <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 text-center sm:text-left">Fill</span>
+                  <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border-2 border-white shadow-sm cursor-pointer mx-auto sm:mx-0">
+                    <input
+                      type="color"
+                      value={toolProps.fill}
+                      onChange={e => setToolProps(p => ({ ...p, fill: e.target.value }))}
+                      className="absolute inset-0 w-full h-full scale-150 cursor-pointer"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="w-px h-6 sm:h-8 bg-slate-200 shrink-0" />
+
+            {/* Range Controls */}
+            <div className="flex flex-col gap-1 shrink-0">
+              <div className="flex justify-between px-1 gap-4">
+                <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                  {tool === 'text' ? 'Size' : 'Width'}
+                </span>
+                <span className="text-[8px] sm:text-[10px] font-bold text-cyan-600 tabular-nums">
+                  {tool === 'text' ? toolProps.fontSize : toolProps.strokeWidth}px
+                </span>
+              </div>
               <input
-                type="color"
-                value={toolProps.fill}
-                onChange={e => setToolProps(p => ({ ...p, fill: e.target.value }))}
-                className="w-6 h-6 sm:w-7 sm:h-7 rounded-lg cursor-pointer border border-gray-200 p-0 bg-white"
-                title="Fill color"
+                type="range"
+                min={tool === 'text' ? "12" : "1"}
+                max={tool === 'text' ? "120" : "40"}
+                value={tool === 'text' ? toolProps.fontSize : toolProps.strokeWidth}
+                onChange={e => {
+                  const val = Number(e.target.value);
+                  if (tool === 'text') setToolProps(p => ({ ...p, fontSize: val }));
+                  else setToolProps(p => ({ ...p, strokeWidth: val }));
+                }}
+                className="w-24 sm:w-32 h-1 bg-slate-200 rounded-full appearance-none accent-cyan-500 cursor-pointer"
               />
             </div>
-          )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Main Island Toolbar */}
+      <motion.div 
+        layout
+        className="glass-panel rounded-2xl sm:rounded-[2rem] p-1.5 sm:p-2 flex items-center gap-1 sm:gap-1.5 shadow-premium border-white/50 max-w-full overflow-x-auto no-scrollbar"
+      >
+        {/* Tool Section */}
+        <div className="flex items-center gap-0.5 sm:gap-1 px-1 border-r border-slate-200/50 mr-0.5 sm:mr-1">
+          {TOOLS.map(({ id, icon: Icon, label }) => (
+            <button
+              key={id}
+              onClick={() => setTool(id)}
+              className={`relative w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all group shrink-0
+                ${tool === id 
+                  ? 'bg-slate-900 text-white shadow-lg' 
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}
+              title={label}
+            >
+              {tool === id && (
+                <motion.div
+                  layoutId="active-tool"
+                  className="absolute inset-0 bg-slate-900 rounded-xl sm:rounded-2xl -z-10"
+                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                />
+              )}
+              <Icon size={18} className="sm:w-5 sm:h-5" strokeWidth={tool === id ? 2.5 : 2} />
+            </button>
+          ))}
         </div>
 
-        {/* Divider */}
-        <div className="w-px h-6 bg-gray-200" />
+        {/* Action Section */}
+        <div className="flex items-center gap-0.5 sm:gap-1">
+          <button
+            onClick={() => setShowProperties(!showProperties)}
+            className={`w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all shrink-0
+              ${showProperties ? 'bg-cyan-50 text-cyan-600' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'}`}
+            title="Object Properties"
+          >
+            <Palette size={18} className="sm:w-5 sm:h-5" />
+          </button>
 
-        {/* Dynamic Controls based on Tool */}
-        {tool === 'text' ? (
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-gray-400 font-bold uppercase hidden sm:block">Size</span>
-            <input
-              type="number"
-              min="8"
-              max="120"
-              value={toolProps.fontSize}
-              onChange={e => setToolProps(p => ({ ...p, fontSize: Number(e.target.value) }))}
-              className="w-12 text-center text-xs border border-gray-200 rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-purple-400"
-            />
-          </div>
-        ) : (
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] text-gray-400 font-bold uppercase hidden sm:block">Width</span>
-            <input
-              type="range"
-              min="1"
-              max="20"
-              value={toolProps.strokeWidth}
-              onChange={e => setToolProps(p => ({ ...p, strokeWidth: Number(e.target.value) }))}
-              className="w-16 sm:w-20 accent-purple-500"
-              title={`Stroke width: ${toolProps.strokeWidth}`}
-            />
-          </div>
-        )}
-      </div>
+          <div className="w-px h-5 sm:h-6 bg-slate-200 mx-0.5 sm:mx-1 shrink-0" />
 
-      {/* Divider */}
-      <div className="w-px h-6 bg-gray-200" />
+          <button
+            onClick={onUndo}
+            disabled={!canUndo}
+            className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-20 transition-all shrink-0"
+            title="Undo"
+          >
+            <Undo2 size={18} className="sm:w-5 sm:h-5" />
+          </button>
+          <button
+            onClick={onRedo}
+            disabled={!canRedo}
+            className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-20 transition-all shrink-0"
+            title="Redo"
+          >
+            <Redo2 size={18} className="sm:w-5 sm:h-5" />
+          </button>
 
-      {/* History actions */}
-      <div className="flex items-center gap-0.5 pl-1">
-        <button
-          onClick={onUndo}
-          disabled={!canUndo}
-          title="Undo (Ctrl+Z)"
-          className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-100 disabled:opacity-30 transition-all shrink-0"
-        >
-          <Undo2 className="w-4 h-4" />
-        </button>
-        <button
-          onClick={onRedo}
-          disabled={!canRedo}
-          title="Redo (Ctrl+Y)"
-          className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-500 hover:bg-gray-100 disabled:opacity-30 transition-all shrink-0"
-        >
-          <Redo2 className="w-4 h-4" />
-        </button>
-        <button
-          onClick={onClearAll}
-          title="Clear canvas"
-          className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center text-gray-500 hover:bg-red-50 hover:text-red-500 transition-all shrink-0"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
-      </div>
+          <button
+            onClick={onClearAll}
+            className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all shrink-0"
+            title="Clear Canvas"
+          >
+            <Trash2 size={18} className="sm:w-5 sm:h-5" />
+          </button>
+        </div>
+      </motion.div>
     </div>
   );
 };

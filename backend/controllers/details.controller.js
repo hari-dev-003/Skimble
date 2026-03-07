@@ -10,22 +10,30 @@ const PARTITION_KEY = 'board_id';
 
 exports.getContent = async (req, res) => {
   try {
+    const ownerId = req.user?.sub;
+    
+    if (!ownerId) {
+      return res.status(401).json({ error: "Authentication required to fetch notes." });
+    }
+
     const command = new ScanCommand({
       TableName: TABLE_NAME,
+      FilterExpression: "userId = :uid",
+      ExpressionAttributeValues: {
+        ":uid": { S: ownerId }
+      }
     });
+
     const data = await dynamoDB.send(command);
-    // Only return notes for the logged-in user
-    const ownerId = req.user?.sub;
-    let unmarshalledItems = data.Items.map((item) => {
+    
+    const unmarshalledItems = data.Items.map((item) => {
       const unmarshalled = unmarshall(item);
       if (unmarshalled.board_id && !unmarshalled.boardId) {
         unmarshalled.boardId = unmarshalled.board_id;
       }
       return unmarshalled;
     });
-    if (ownerId) {
-      unmarshalledItems = unmarshalledItems.filter(item => item.userId === ownerId);
-    }
+
     res.status(200).json(unmarshalledItems);
   } catch (error) {
     console.error("Error fetching items:", error);
@@ -36,7 +44,7 @@ exports.getContent = async (req, res) => {
 
 
 exports.addContent = async (req, res) => {
-  const { title, content, favourite } = req.body;
+  const { title, content, favourite, category } = req.body;
   const ownerId = req.user?.sub; // Use optional chaining for safety
 
   // Validate input
@@ -55,6 +63,7 @@ exports.addContent = async (req, res) => {
       userId: { S: ownerId },
       title: { S: title },
       content: { S: content },
+      category: { S: category || 'General' },
       updatedAt: { N: timestamp.toString() },
       favourite: { BOOL: !!favourite },
     },
@@ -115,6 +124,10 @@ exports.updateContent = async (req, res) => {
   if (favourite !== undefined) {
     updateExp.push('favourite = :favourite');
     expAttrValues[':favourite'] = { BOOL: !!favourite };
+  }
+  if (category !== undefined) {
+    updateExp.push('category = :category');
+    expAttrValues[':category'] = { S: category };
   }
   updateExp.push('updatedAt = :updatedAt');
   if (updateExp.length === 1) {

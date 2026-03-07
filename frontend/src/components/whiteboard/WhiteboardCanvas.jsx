@@ -113,7 +113,12 @@ const WhiteboardCanvas = ({
     if (!transformerRef.current || !stageRef.current) return;
     if (selectedId && tool === 'select') {
       const node = stageRef.current.findOne(`#${selectedId}`);
-      if (node) { transformerRef.current.nodes([node]); transformerRef.current.getLayer()?.batchDraw(); }
+      if (node) { 
+        transformerRef.current.nodes([node]); 
+        transformerRef.current.borderStroke('#06b6d4');
+        transformerRef.current.anchorStroke('#06b6d4');
+        transformerRef.current.getLayer()?.batchDraw(); 
+      }
     } else {
       transformerRef.current.nodes([]);
       transformerRef.current.getLayer()?.batchDraw();
@@ -449,7 +454,7 @@ const WhiteboardCanvas = ({
           ))}
           {/* Render local user's name tag next to their cursor position */}
           {localCursor && (
-            <RemoteCursor x={localCursor.x} y={localCursor.y} username={userEmail} color="#6366f1" />
+            <RemoteCursor x={localCursor.x} y={localCursor.y} username={userEmail} color="#06b6d4" />
           )}
         </Layer>
       </Stage>
@@ -464,17 +469,17 @@ const WhiteboardCanvas = ({
           onKeyDown={handleTextareaKeyDown}
           onPointerDown={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
-          className="fixed z-50 bg-white border-2 border-purple-500 rounded-lg shadow-xl p-2 resize-none outline-none min-w-[160px] min-h-[44px]"
+          className="fixed z-50 bg-white/90 backdrop-blur-xl border border-cyan-500/30 rounded-2xl shadow-premium p-4 resize-none outline-none min-w-[200px] min-h-[60px] text-slate-800 placeholder:text-slate-300 focus:border-cyan-500/50"
           style={{
             left: editingText.screenX,
             top: editingText.screenY,
             fontSize: `${editingText.fontSize || 18}px`,
             fontFamily: 'Aptos, sans-serif',
-            color: editingText.fill || '#1a1a1a',
             lineHeight: 1.5,
-            transform: 'translate(-4px, -4px)',
+            transform: 'translate(-10px, -10px)',
+            fontWeight: 600,
           }}
-          placeholder="Type here… Enter to save"
+          placeholder="Start typing..."
           rows={1}
           spellCheck={false}
           autoFocus

@@ -10,14 +10,16 @@ import Landing from './pages/Landing';
 
 function AppLayout() {
   return (
-    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="flex h-screen overflow-hidden bg-slate-50 flex-col lg:flex-row">
       <Sidebar />
-      <main className="flex-1 ml-[240px] min-h-screen overflow-hidden">
+      <main className="flex-1 h-full overflow-y-auto relative bg-[#f8fafc] mt-16 lg:mt-0">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/brainstorm" element={<BrainstormPage />} />
+          <Route path="/favorites" element={<Home initialFilter="favorites" />} />
           <Route path="/join" element={<JoinPage />} />
           <Route path="/whiteboard/:sessionCode" element={<Whiteboard />} />
+          <Route path="/settings" element={<div className="p-10 text-slate-400">Settings coming soon...</div>} />
         </Routes>
       </main>
     </div>
@@ -29,10 +31,13 @@ function App() {
 
   if (auth.isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin" />
-          <p className="text-gray-500 text-sm">Loading…</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#f8fafc]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative">
+            <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
+            <div className="absolute inset-0 w-12 h-12 border-4 border-transparent border-b-indigo-300 rounded-full animate-spin-slow" />
+          </div>
+          <p className="text-slate-500 font-medium tracking-wide animate-pulse">Initializing Skimble...</p>
         </div>
       </div>
     );
