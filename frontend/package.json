@@ -14,12 +14,15 @@
     "@tailwindcss/vite": "^4.1.10",
     "aws-amplify": "^6.15.1",
     "axios": "^1.10.0",
+    "konva": "^10.2.0",
     "lucide-react": "^0.523.0",
     "oidc-client-ts": "^3.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-konva": "^19.2.3",
     "react-oidc-context": "^3.3.0",
     "react-router-dom": "^7.6.2",
+    "socket.io-client": "^4.8.3",
     "tailwindcss": "^4.1.10"
   },
   "devDependencies": {

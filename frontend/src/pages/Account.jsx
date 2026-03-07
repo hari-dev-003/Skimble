@@ -5,12 +5,13 @@ const Account = () => {
 
     const auth = useAuth();
 
-    const signOutRedirect = () => {
-      const clientId = "3uoobjh33ri6tuebivgcccmrfk";
-      const logoutUri = "http://localhost:5173"; // Ensure this matches your redirect URI in Cognito
-      const cognitoDomain = "https://ap-south-1rsw3jvpsk.auth.ap-south-1.amazoncognito.com";
-      window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
-    };
+const signOutRedirect = async () => {
+    await auth.removeUser();
+    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+    const logoutUri = import.meta.env.VITE_COGNITO_REDIRECT_URI;
+    const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+  };
 
 
  if (auth.isAuthenticated) {

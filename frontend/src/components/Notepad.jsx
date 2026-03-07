@@ -5,7 +5,7 @@ import NoteModal from "./NoteModal";
 import { Star } from "lucide-react";
 import FilterBar from "./FilterBar";
 
-const Notepad = ({ showFavourites }) => {
+const Notepad = ({ showFavourites, searchTerm = '' }) => {
     const [data, setData] = useState(null);
     const [filteredData, setFilteredData] = useState(null);
     const [selectedNote, setSelectedNote] = useState(null);
@@ -45,6 +45,13 @@ const Notepad = ({ showFavourites }) => {
         if (showFavourites) {
             filtered = filtered.filter(note => note.favourite);
         }
+        if (searchTerm.trim()) {
+            const lower = searchTerm.toLowerCase();
+            filtered = filtered.filter(note =>
+                (note.title || '').toLowerCase().includes(lower) ||
+                (note.content || '').toLowerCase().includes(lower)
+            );
+        }
         if (selectedCategory !== "All") {
             filtered = filtered.filter(note => note.category === selectedCategory);
         }
@@ -56,7 +63,7 @@ const Notepad = ({ showFavourites }) => {
             filtered.sort((a, b) => (b.priority || 0) - (a.priority || 0));
         }
         setFilteredData(filtered);
-    }, [data, selectedCategory, selectedSort, showFavourites]);
+    }, [data, selectedCategory, selectedSort, showFavourites, searchTerm]);
 
     // Export functionality (CSV)
     const handleExport = () => {

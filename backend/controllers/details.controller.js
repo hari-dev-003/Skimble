@@ -6,6 +6,8 @@ const { ScanCommand } = require("@aws-sdk/client-dynamodb");
 const { PutItemCommand, DeleteItemCommand, UpdateItemCommand } = require("@aws-sdk/client-dynamodb");
 const { unmarshall } = require("@aws-sdk/util-dynamodb");
 
+const PARTITION_KEY = 'board_id';
+
 exports.getContent = async (req, res) => {
   try {
     const command = new ScanCommand({
@@ -14,7 +16,13 @@ exports.getContent = async (req, res) => {
     const data = await dynamoDB.send(command);
     // Only return notes for the logged-in user
     const ownerId = req.user?.sub;
-    let unmarshalledItems = data.Items.map((item) => unmarshall(item));
+    let unmarshalledItems = data.Items.map((item) => {
+      const unmarshalled = unmarshall(item);
+      if (unmarshalled.board_id && !unmarshalled.boardId) {
+        unmarshalled.boardId = unmarshalled.board_id;
+      }
+      return unmarshalled;
+    });
     if (ownerId) {
       unmarshalledItems = unmarshalledItems.filter(item => item.userId === ownerId);
     }
@@ -37,11 +45,13 @@ exports.addContent = async (req, res) => {
   }
 
   const timestamp = Math.floor(Date.now() / 1000);
+  const generatedId = uuidv4();
 
   const params = {
     TableName: TABLE_NAME,
     Item: {
-      boardId: { S: uuidv4() },
+      [PARTITION_KEY]: { S: generatedId },
+      boardId: { S: generatedId },
       userId: { S: ownerId },
       title: { S: title },
       content: { S: content },
@@ -53,7 +63,7 @@ exports.addContent = async (req, res) => {
   try {
     const command = new PutItemCommand(params);
     await dynamoDB.send(command);
-    res.status(201).json({ message: 'Details added successfully', boardId: params.Item.boardId.S });
+    res.status(201).json({ message: 'Details added successfully', boardId: generatedId });
   } catch (error) {
     console.error("Error adding details:", error);
     res.status(500).json({ error: "An error occurred while adding details" });
@@ -68,7 +78,7 @@ exports.deleteContent = async (req, res) => {
   const params = {
     TableName: TABLE_NAME,
     Key: {
-      boardId: { S: boardId },
+      [PARTITION_KEY]: { S: boardId },
     },
     ReturnValues: 'ALL_OLD'
   };
@@ -113,12 +123,12 @@ exports.updateContent = async (req, res) => {
   const params = {
     TableName: TABLE_NAME,
     Key: {
-      boardId: { S: boardId },
+      [PARTITION_KEY]: { S: boardId },
     },
     UpdateExpression: 'set ' + updateExp.join(', '),
     ExpressionAttributeValues: expAttrValues,
     ReturnValues: 'ALL_NEW',
-    ConditionExpression: 'attribute_exists(boardId)'
+    ConditionExpression: `attribute_exists(${PARTITION_KEY})`
   };
   try {
     const command = new UpdateItemCommand(params);
