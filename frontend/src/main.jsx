@@ -3,12 +3,13 @@ import './index.css'
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
 import { AuthProvider } from "react-oidc-context";
+import { ThemeProvider } from './context/ThemeContext.jsx';
 
 const cognitoAuthConfig = {
-  authority: import.meta.env.VITE_COGNITO_AUTHORITY,
-  client_id: import.meta.env.VITE_COGNITO_CLIENT_ID,
+  authority:     import.meta.env.VITE_COGNITO_AUTHORITY,
+  client_id:     import.meta.env.VITE_COGNITO_CLIENT_ID,
   client_secret: import.meta.env.VITE_COGNITO_CLIENT_SECRET,
-  redirect_uri: import.meta.env.VITE_COGNITO_REDIRECT_URI,
+  redirect_uri:  import.meta.env.VITE_COGNITO_REDIRECT_URI,
   response_type: "code",
   scope: "phone openid email",
   onSigninCallback: () => {
@@ -17,9 +18,11 @@ const cognitoAuthConfig = {
 };
 
 createRoot(document.getElementById('root')).render(
-  <AuthProvider {...cognitoAuthConfig}>
-    <BrowserRouter>
-      <App />
-    </BrowserRouter>
-  </AuthProvider>,
+  <ThemeProvider>
+    <AuthProvider {...cognitoAuthConfig}>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    </AuthProvider>
+  </ThemeProvider>,
 )

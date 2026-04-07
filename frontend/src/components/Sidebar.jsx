@@ -1,152 +1,159 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
-import { 
-  Home as HomeIcon, 
-  Layout, 
-  Settings, 
-  LogOut, 
+import {
+  Layout,
+  Settings,
+  LogOut,
   PenTool,
   ChevronLeft,
   ChevronRight,
   Users,
   Grid,
   Menu,
-  X
+  X,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useTheme } from '../context/ThemeContext';
 
 const Sidebar = () => {
   const { pathname } = useLocation();
   const auth = useAuth();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isDark, toggle } = useTheme();
+  const [isCollapsed, setIsCollapsed]   = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   const navItems = [
-    { icon: Grid, label: 'Workspace', path: '/' },
-    { icon: Layout, label: 'Brainstorm', path: '/brainstorm' },
-    { icon: Users, label: 'Join Session', path: '/join' },
-  ];
-
-  const bottomItems = [
-    { icon: Settings, label: 'Settings', path: '/settings' },
+    { icon: Grid,   label: 'Workspace',    path: '/' },
+    { icon: Layout, label: 'Brainstorm',   path: '/brainstorm' },
+    { icon: Users,  label: 'Join Session', path: '/join' },
   ];
 
   const isActive = (path) => pathname === path;
 
-  const userProfile = auth.user?.profile;
-  const userDisplayName = userProfile?.name || userProfile?.given_name || userProfile?.preferred_username || userProfile?.['cognito:username'] || userProfile?.nickname || userProfile?.email || 'User';
+  const userProfile     = auth.user?.profile;
+  const userDisplayName = userProfile?.name || userProfile?.given_name
+    || userProfile?.preferred_username || userProfile?.['cognito:username']
+    || userProfile?.nickname || userProfile?.email || 'User';
   const userInitial = (userDisplayName === 'User' ? userProfile?.email?.[0] : userDisplayName?.[0]) || 'U';
 
   const handleLogout = async () => {
-    // Clear local OIDC state
     auth.removeUser();
-    
-    // AWS Cognito requires a manual redirect to their logout endpoint
-    const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
+    const clientId  = import.meta.env.VITE_COGNITO_CLIENT_ID;
     const logoutUri = import.meta.env.VITE_COGNITO_REDIRECT_URI;
-    const domain = import.meta.env.VITE_COGNITO_DOMAIN;
-    
-    // Construct the Cognito logout URL
-    const cognitoLogoutUrl = `${domain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
-    
-    // Redirect to Cognito
-    window.location.href = cognitoLogoutUrl;
+    const domain    = import.meta.env.VITE_COGNITO_DOMAIN;
+    window.location.href = `${domain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   };
 
   const sidebarContent = (
     <>
-      {/* Logo Section */}
-      <div className="p-6 mb-4 flex items-center justify-between overflow-hidden">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-cyan-500 rounded-xl flex items-center justify-center shadow-lg shadow-cyan-500/20 shrink-0">
-            <PenTool className="text-[#0f172a] w-6 h-6" strokeWidth={2.5} />
-          </div>
-          {(!isCollapsed || isMobileOpen) && (
-            <motion.span 
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="font-black text-xl text-white tracking-tighter uppercase"
-            >
-              Skimble
-            </motion.span>
-          )}
+      {/* Logo */}
+      <div className="flex items-center gap-3 px-5 py-5 overflow-hidden">
+        <div className="w-8 h-8 bg-sk-accent/12 border border-sk-accent/25 rounded-lg flex items-center justify-center shrink-0">
+          <PenTool className="text-sk-accent w-4 h-4" strokeWidth={2.5} />
         </div>
-        
+        {(!isCollapsed || isMobileOpen) && (
+          <motion.span
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="font-black text-sm tracking-tighter uppercase text-sk-1"
+          >
+            Skimble
+          </motion.span>
+        )}
         {isMobileOpen && (
-          <button onClick={() => setIsMobileOpen(false)} className="lg:hidden text-slate-400 hover:text-white">
-            <X size={24} />
+          <button
+            onClick={() => setIsMobileOpen(false)}
+            className="ml-auto lg:hidden text-sk-3 hover:text-sk-1 transition-colors"
+          >
+            <X size={18} />
           </button>
         )}
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 space-y-2 overflow-y-auto no-scrollbar">
+      <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto no-scrollbar mt-1">
         {navItems.map((item) => (
           <Link
             key={item.path}
             to={item.path}
             onClick={() => setIsMobileOpen(false)}
-            className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all group ${
-              isActive(item.path)
-                ? 'bg-cyan-500/10 text-cyan-400 font-bold border border-cyan-500/20'
-                : 'hover:bg-white/5 hover:text-white text-slate-400'
-            }`}
+            className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
+              ${isActive(item.path)
+                ? 'bg-sk-accent/12 text-sk-accent'
+                : 'text-sk-3 hover:bg-sk-raised hover:text-sk-1'
+              }`}
           >
-            <item.icon className={`w-5 h-5 shrink-0 ${isActive(item.path) ? 'text-cyan-400' : 'text-slate-500 group-hover:text-white'}`} />
-            {(!isCollapsed || isMobileOpen) && <span className="truncate text-sm tracking-tight font-bold">{item.label}</span>}
+            {isActive(item.path) && (
+              <span
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 rounded-full bg-sk-accent"
+                style={{ boxShadow: '0 0 8px #06B6D4' }}
+              />
+            )}
+            <item.icon className="w-4 h-4 shrink-0" />
+            {(!isCollapsed || isMobileOpen) && (
+              <span className="text-sm font-medium truncate">{item.label}</span>
+            )}
           </Link>
         ))}
       </nav>
 
-      {/* User Profile Section */}
-      <div className="px-4 mb-4 mt-auto border-t border-white/5 pt-6">
-        <div className={`flex items-center gap-3 px-2 py-3 rounded-xl bg-white/5 border border-white/5 overflow-hidden ${isCollapsed && !isMobileOpen ? 'justify-center' : ''}`}>
-          <div className="w-9 h-9 rounded-lg bg-cyan-500/20 border border-cyan-500/30 flex items-center justify-center shrink-0 shadow-inner">
-            <span className="text-cyan-400 font-black text-sm uppercase">
-              {userInitial}
-            </span>
+      {/* User Profile */}
+      <div className="px-3 mt-auto pt-4 border-t border-sk-subtle">
+        <div className={`flex items-center gap-3 px-3 py-2.5 rounded-xl bg-sk-raised overflow-hidden ${isCollapsed && !isMobileOpen ? 'justify-center' : ''}`}>
+          <div className="w-8 h-8 rounded-lg bg-sk-accent/12 border border-sk-accent/25 flex items-center justify-center shrink-0">
+            <span className="text-xs font-semibold uppercase text-sk-accent">{userInitial}</span>
           </div>
-          
           {(!isCollapsed || isMobileOpen) && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col min-w-0"
-            >
-              <span className="text-xs font-black text-white truncate leading-tight uppercase tracking-tight">
-                {userDisplayName}
-              </span>
-              <span className="text-[10px] font-bold text-slate-500 truncate mt-0.5">
-                {userProfile?.email}
-              </span>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col min-w-0">
+              <span className="text-sm font-medium text-sk-1 truncate leading-tight">{userDisplayName}</span>
+              <span className="text-xs text-sk-3 truncate mt-0.5">{userProfile?.email}</span>
             </motion.div>
           )}
         </div>
       </div>
 
       {/* Bottom Actions */}
-      <div className="px-4 pb-8 space-y-2">
-        {bottomItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            onClick={() => setIsMobileOpen(false)}
-            className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all group ${
-              isActive(item.path)
-                ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20'
-                : 'hover:bg-white/5 hover:text-white text-slate-400'
-            }`}
+      <div className="px-3 pb-6 mt-2 space-y-0.5">
+        {/* Theme Toggle */}
+        <button
+          onClick={toggle}
+          className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sk-2 hover:bg-sk-raised hover:text-sk-1 text-sm font-medium ${isCollapsed && !isMobileOpen ? 'justify-center' : ''}`}
+          title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+        >
+          <motion.div
+            key={isDark ? 'moon' : 'sun'}
+            initial={{ rotate: -30, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            transition={{ duration: 0.25 }}
           >
-            <item.icon className="w-5 h-5 shrink-0 text-slate-400 group-hover:text-white" />
-            {(!isCollapsed || isMobileOpen) && <span className="text-sm font-bold tracking-tight">{item.label}</span>}
-          </Link>
-        ))}
+            {isDark ? <Sun className="w-4 h-4 shrink-0" /> : <Moon className="w-4 h-4 shrink-0" />}
+          </motion.div>
+          {(!isCollapsed || isMobileOpen) && (
+            <span>{isDark ? 'Light Mode' : 'Dark Mode'}</span>
+          )}
+        </button>
+
+        <Link
+          to="/settings"
+          onClick={() => setIsMobileOpen(false)}
+          className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200
+            ${isActive('/settings')
+              ? 'bg-sk-accent/12 text-sk-accent'
+              : 'text-sk-3 hover:bg-sk-raised hover:text-sk-1'
+            }`}
+        >
+          <Settings className="w-4 h-4 shrink-0" />
+          {(!isCollapsed || isMobileOpen) && <span className="text-sm font-medium">Settings</span>}
+        </Link>
+
         <button
           onClick={handleLogout}
-          className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-red-400/70 hover:bg-red-500/10 hover:text-red-400 transition-all group font-bold tracking-tight text-sm"
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 text-sk-3 hover:bg-sk-danger/8 hover:text-sk-danger text-sm font-medium"
         >
-          <LogOut className="w-5 h-5 shrink-0" />
+          <LogOut className="w-4 h-4 shrink-0" />
           {(!isCollapsed || isMobileOpen) && <span>Sign Out</span>}
         </button>
       </div>
@@ -155,18 +162,30 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile Header Toggle */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#0f172a] border-b border-white/5 flex items-center px-6 z-50 justify-between">
+      {/* Mobile Header */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-sk-surface border-b border-sk-subtle flex items-center px-5 z-50 justify-between">
         <div className="flex items-center gap-2">
-          <PenTool className="text-cyan-500 w-6 h-6" />
-          <span className="text-white font-black uppercase tracking-tighter">Skimble</span>
+          <PenTool className="text-sk-accent w-4 h-4" />
+          <span className="text-sk-1 font-black text-sm uppercase tracking-tighter">Skimble</span>
         </div>
-        <button onClick={() => setIsMobileOpen(true)} className="p-2 text-slate-400 hover:text-white bg-white/5 rounded-lg">
-          <Menu size={20} />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggle}
+            className="p-2 text-sk-2 hover:text-sk-1 bg-sk-raised rounded-lg transition-colors"
+            title={isDark ? 'Light mode' : 'Dark mode'}
+          >
+            {isDark ? <Sun size={16} /> : <Moon size={16} />}
+          </button>
+          <button
+            onClick={() => setIsMobileOpen(true)}
+            className="p-2 text-sk-2 hover:text-sk-1 bg-sk-raised rounded-lg transition-colors"
+          >
+            <Menu size={18} />
+          </button>
+        </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer Overlay */}
       <AnimatePresence>
         {isMobileOpen && (
           <>
@@ -175,14 +194,15 @@ const Sidebar = () => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsMobileOpen(false)}
-              className="lg:hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[60]"
+              className="lg:hidden fixed inset-0 z-[60] backdrop-blur-sm"
+              style={{ background: 'var(--sk-backdrop)' }}
             />
             <motion.aside
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="lg:hidden fixed left-0 top-0 bottom-0 w-[280px] bg-[#0f172a] z-[70] flex flex-col border-r border-white/10 shadow-2xl"
+              className="lg:hidden fixed left-0 top-0 bottom-0 w-64 bg-sk-surface z-[70] flex flex-col border-r border-sk-subtle shadow-lg"
             >
               {sidebarContent}
             </motion.aside>
@@ -193,17 +213,18 @@ const Sidebar = () => {
       {/* Desktop Sidebar */}
       <motion.aside
         initial={false}
-        animate={{ width: isCollapsed ? '80px' : '260px' }}
-        className="hidden lg:flex h-screen bg-[#0f172a] text-slate-400 flex flex-col relative z-40 shadow-2xl transition-all duration-300 ease-in-out border-r border-white/5 shrink-0"
+        animate={{ width: isCollapsed ? '64px' : '240px' }}
+        transition={{ duration: 0.2, ease: 'easeInOut' }}
+        className="hidden lg:flex h-screen bg-sk-surface flex-col relative z-40 shrink-0 border-r border-sk-subtle"
       >
         {sidebarContent}
-        
+
         {/* Collapse Toggle */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="absolute -right-3 top-20 w-6 h-6 bg-[#1e293b] border border-white/10 rounded-full flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-700 transition-all shadow-xl"
+          className="absolute -right-2.5 top-20 w-5 h-5 bg-sk-raised border border-sk-strong rounded-full flex items-center justify-center text-sk-3 hover:text-sk-1 hover:border-sk-accent/30 transition-all"
         >
-          {isCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          {isCollapsed ? <ChevronRight className="w-3 h-3" /> : <ChevronLeft className="w-3 h-3" />}
         </button>
       </motion.aside>
     </>
