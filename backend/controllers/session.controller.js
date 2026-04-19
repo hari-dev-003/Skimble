@@ -169,3 +169,20 @@ exports.saveCanvasState = async (code, elements) => {
     }
   }
 };
+
+exports.fetchSessionElements = async (code) => {
+  const params = {
+    TableName: SESSION_TABLE_NAME,
+    Key: { [PARTITION_KEY]: { S: code.toUpperCase() } },
+  };
+
+  try {
+    const result = await dynamoDB.send(new GetItemCommand(params));
+    if (!result.Item) return null;
+    const session = unmarshall(result.Item);
+    return JSON.parse(session.canvasElements || '[]');
+  } catch (error) {
+    console.error(`Error fetching elements for session ${code}:`, error);
+    return null;
+  }
+};

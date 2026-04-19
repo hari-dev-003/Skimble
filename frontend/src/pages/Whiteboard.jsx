@@ -74,6 +74,7 @@ const Whiteboard = () => {
   }, [code]);
 
   const handleSessionSynced = useCallback(({ elements: remoteEls, participants: remoteParticipants }) => {
+    console.log('Session Synced from Server:', remoteEls.length, 'elements');
     setElements(remoteEls || []);
     const filtered = (remoteParticipants || [])
       .map(p => ({ userId: p.userId, name: p.name || p.displayName || p.email || 'User' }))
@@ -82,6 +83,7 @@ const Whiteboard = () => {
   }, [userId, userDisplayName]);
 
   const handleElementUpserted = useCallback((element) => {
+    console.log('Remote element upserted:', element.id);
     setElements(prev => {
       const idx = prev.findIndex(el => el.id === element.id);
       if (idx >= 0) { const u = [...prev]; u[idx] = element; return u; }

@@ -15,9 +15,42 @@ function throttle(fn, ms) {
   };
 }
 
-export function useWhiteboardSocket({ sessionCode, token, displayName, initialElements, onElementUpserted, onElementDeleted, onCursorMoved, onParticipantJoined, onParticipantLeft, onSessionSynced }) {
+export function useWhiteboardSocket({ 
+  sessionCode, 
+  token, 
+  displayName, 
+  initialElements, 
+  onElementUpserted, 
+  onElementDeleted, 
+  onCursorMoved, 
+  onParticipantJoined, 
+  onParticipantLeft, 
+  onSessionSynced 
+}) {
   const socketRef = useRef(null);
   const [connected, setConnected] = useState(false);
+  const joinedRef = useRef(false);
+
+  // Use refs for callbacks to avoid stale closures in useEffect
+  const callbacks = useRef({
+    onElementUpserted,
+    onElementDeleted,
+    onCursorMoved,
+    onParticipantJoined,
+    onParticipantLeft,
+    onSessionSynced
+  });
+
+  useEffect(() => {
+    callbacks.current = {
+      onElementUpserted,
+      onElementDeleted,
+      onCursorMoved,
+      onParticipantJoined,
+      onParticipantLeft,
+      onSessionSynced
+    };
+  });
 
   useEffect(() => {
     if (!sessionCode) return;
@@ -25,43 +58,52 @@ export function useWhiteboardSocket({ sessionCode, token, displayName, initialEl
     const socket = io(BACKEND_URL, {
       auth: { token: token || '' },
       transports: ['websocket', 'polling'],
+      reconnectionAttempts: 5,
     });
 
     socketRef.current = socket;
 
     socket.on('connect', () => {
       setConnected(true);
-      socket.emit('join-session', {
-        sessionCode: sessionCode.toUpperCase(),
-        initialElements: initialElements || [],
-        name: displayName,
-      });
+      // Only join if we haven't or if sessionCode changed
+      // Wait for initialElements to be populated if they are coming from a load
+      if (initialElements && initialElements.length > 0) {
+        socket.emit('join-session', {
+          sessionCode: sessionCode.toUpperCase(),
+          initialElements,
+          name: displayName,
+        });
+        joinedRef.current = true;
+      }
     });
 
-    socket.on('disconnect', () => setConnected(false));
+    socket.on('disconnect', () => {
+      setConnected(false);
+      joinedRef.current = false;
+    });
 
     socket.on('session-synced', (data) => {
-      onSessionSynced?.(data);
+      callbacks.current.onSessionSynced?.(data);
     });
 
     socket.on('element-upserted', ({ element }) => {
-      onElementUpserted?.(element);
+      callbacks.current.onElementUpserted?.(element);
     });
 
     socket.on('element-deleted', ({ elementId }) => {
-      onElementDeleted?.(elementId);
+      callbacks.current.onElementDeleted?.(elementId);
     });
 
     socket.on('cursor-moved', (data) => {
-      onCursorMoved?.(data);
+      callbacks.current.onCursorMoved?.(data);
     });
 
     socket.on('participant-joined', (data) => {
-      onParticipantJoined?.(data);
+      callbacks.current.onParticipantJoined?.(data);
     });
 
     socket.on('participant-left', (data) => {
-      onParticipantLeft?.(data);
+      callbacks.current.onParticipantLeft?.(data);
     });
 
     return () => {
@@ -69,33 +111,53 @@ export function useWhiteboardSocket({ sessionCode, token, displayName, initialEl
       socket.disconnect();
       socketRef.current = null;
       setConnected(false);
+      joinedRef.current = false;
     };
+  // Re-run if any of these change, especially initialElements for the first join
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sessionCode]);
+  }, [sessionCode, token, displayName, initialElements?.length > 0]);
+
+  // Special case: if we connected but didn't have initial elements yet, join once they arrive
+  useEffect(() => {
+    if (socketRef.current?.connected && !joinedRef.current && initialElements && initialElements.length > 0) {
+      socketRef.current.emit('join-session', {
+        sessionCode: sessionCode.toUpperCase(),
+        initialElements,
+        name: displayName,
+      });
+      joinedRef.current = true;
+    }
+  }, [initialElements, sessionCode, displayName]);
 
   const emitElementUpsert = useCallback((element) => {
-    socketRef.current?.emit('element-upsert', {
-      sessionCode: sessionCode.toUpperCase(),
-      element,
-    });
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('element-upsert', {
+        sessionCode: sessionCode.toUpperCase(),
+        element,
+      });
+    }
   }, [sessionCode]);
 
   const emitElementDelete = useCallback((elementId) => {
-    socketRef.current?.emit('element-delete', {
-      sessionCode: sessionCode.toUpperCase(),
-      elementId,
-    });
+    if (socketRef.current?.connected) {
+      socketRef.current.emit('element-delete', {
+        sessionCode: sessionCode.toUpperCase(),
+        elementId,
+      });
+    }
   }, [sessionCode]);
 
-  // Throttled cursor emit — max once per 50ms
+  // Throttled cursor emit — max once per 100ms
   const emitCursorMove = useCallback(
     throttle((x, y) => {
-      socketRef.current?.emit('cursor-move', {
-        sessionCode: sessionCode.toUpperCase(),
-        x,
-        y,
-      });
-    }, 50),
+      if (socketRef.current?.connected) {
+        socketRef.current.emit('cursor-move', {
+          sessionCode: sessionCode.toUpperCase(),
+          x,
+          y,
+        });
+      }
+    }, 100),
     [sessionCode]
   );
 

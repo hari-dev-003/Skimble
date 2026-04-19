@@ -1,14 +1,15 @@
 const jwt = require('jsonwebtoken');
 const jwkToPem = require('jwk-to-pem');
-const { saveCanvasState } = require('../controllers/session.controller');
+const { saveCanvasState, fetchSessionElements } = require('../controllers/session.controller');
 
 // In-memory store: Map<sessionCode, { elements: [], participants: Map<userId, {email, socketId}>, saveTimer }>
 const activeSessions = new Map();
 
-function getOrCreateSession(code) {
+async function getOrCreateSession(code) {
   if (!activeSessions.has(code)) {
+    const dbElements = await fetchSessionElements(code);
     activeSessions.set(code, {
-      elements: [],
+      elements: dbElements || [],
       participants: new Map(),
       saveTimer: null,
       dirty: false,
@@ -23,9 +24,10 @@ function scheduleSave(code) {
   if (session.saveTimer) clearTimeout(session.saveTimer);
   session.dirty = true;
   session.saveTimer = setTimeout(async () => {
-    if (session.dirty) {
-      session.dirty = false;
-      await saveCanvasState(code, session.elements);
+    const s = activeSessions.get(code);
+    if (s && s.dirty) {
+      s.dirty = false;
+      await saveCanvasState(code, s.elements);
     }
   }, 3000);
 }
@@ -40,20 +42,18 @@ function registerWhiteboardHandlers(io) {
       const code = sessionCode.toUpperCase();
       socket.join(code);
 
-      const session = getOrCreateSession(code);
+      const session = await getOrCreateSession(code);
 
-      // If server has no elements yet but client sent initial (from DB load in frontend)
+      // If server elements are empty, we can try using what the client sent as a backup
       if (session.elements.length === 0 && initialElements && initialElements.length > 0) {
         session.elements = initialElements;
       }
 
-      // Use the name provided by the client if available, otherwise fallback to auth data
       const finalName = name || displayName;
-      socket.data.displayName = finalName; // Update persistent socket data
+      socket.data.displayName = finalName;
 
       session.participants.set(userId, { name: finalName, socketId: socket.id });
 
-      // Send current canvas state to the joining user
       socket.emit('session-synced', {
         elements: session.elements,
         participants: Array.from(session.participants.entries()).map(([uid, info]) => ({
@@ -62,17 +62,14 @@ function registerWhiteboardHandlers(io) {
         })),
       });
 
-      // Notify others that someone joined
       socket.to(code).emit('participant-joined', { userId, name: finalName });
-
       socket.data.sessionCode = code;
     });
 
-    socket.on('element-upsert', ({ sessionCode, element }) => {
+    socket.on('element-upsert', async ({ sessionCode, element }) => {
       if (!sessionCode || !element || !element.id) return;
       const code = sessionCode.toUpperCase();
-      const session = activeSessions.get(code);
-      if (!session) return;
+      const session = await getOrCreateSession(code);
 
       const idx = session.elements.findIndex(el => el.id === element.id);
       if (idx >= 0) {
@@ -81,16 +78,14 @@ function registerWhiteboardHandlers(io) {
         session.elements.push(element);
       }
 
-      // Broadcast to all OTHER clients in the room
       socket.to(code).emit('element-upserted', { element });
       scheduleSave(code);
     });
 
-    socket.on('element-delete', ({ sessionCode, elementId }) => {
+    socket.on('element-delete', async ({ sessionCode, elementId }) => {
       if (!sessionCode || !elementId) return;
       const code = sessionCode.toUpperCase();
-      const session = activeSessions.get(code);
-      if (!session) return;
+      const session = await getOrCreateSession(code);
 
       session.elements = session.elements.filter(el => el.id !== elementId);
       socket.to(code).emit('element-deleted', { elementId });
@@ -100,7 +95,6 @@ function registerWhiteboardHandlers(io) {
     socket.on('cursor-move', ({ sessionCode, x, y }) => {
       if (!sessionCode) return;
       const code = sessionCode.toUpperCase();
-      // Always use the latest displayName from socket.data
       socket.to(code).emit('cursor-moved', { userId, name: socket.data.displayName, x, y });
     });
 
@@ -125,12 +119,10 @@ function handleLeave(socket, code, io) {
   if (session) {
     session.participants.delete(userId);
     if (session.participants.size === 0) {
-      // Persist final state before clearing from memory
       if (session.dirty) {
         saveCanvasState(code, session.elements);
         session.dirty = false;
       }
-      // Keep in memory for 5 min in case users reconnect quickly
       setTimeout(() => {
         const s = activeSessions.get(code);
         if (s && s.participants.size === 0) {
