@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,700&family=Lexend:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 /* ─── Class-based dark mode ─────────────────────────────────── */
@@ -6,8 +6,8 @@
 
 /* ─── Static tokens (accent / semantic — same in both modes) ── */
 @theme {
-  --color-sk-accent:    #06B6D4;
-  --color-sk-accent-hi: #22D3EE;
+  --color-sk-accent:    #2563EB; /* Blue-600 */
+  --color-sk-accent-hi: #3B82F6; /* Blue-500 */
   --color-sk-danger:    #EF4444;
   --color-sk-success:   #10B981;
   --color-sk-warning:   #F59E0B;
@@ -15,8 +15,8 @@
   --shadow-sm:      0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
   --shadow-md:      0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
   --shadow-lg:      0 20px 60px rgba(0,0,0,0.18), 0 8px 20px rgba(0,0,0,0.10);
-  --shadow-accent:  0 0 0 1px rgba(6,182,212,0.25), 0 4px 20px rgba(6,182,212,0.15);
-  --shadow-fab:     0 4px 20px rgba(6,182,212,0.35);
+  --shadow-accent:  0 0 0 1px rgba(37,99,235,0.25), 0 4px 20px rgba(37,99,235,0.15);
+  --shadow-fab:     0 4px 20px rgba(37,99,235,0.35);
   --shadow-premium: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05);
 }
 
@@ -33,50 +33,50 @@
   --color-sk-strong:  var(--sk-strong);
 }
 
-/* ─── Light mode (default) ───────────────────────────────────── */
+/* ─── Light mode (Soft Paper) ────────────────────────────────── */
 :root {
-  --sk-base:    #F4F6F9;
+  --sk-base:    #F9F9F9;
   --sk-surface: #FFFFFF;
-  --sk-raised:  #EDF0F5;
-  --sk-input:   #EDF0F5;
-  --sk-1:       #0F172A;
-  --sk-2:       #475569;
-  --sk-3:       #94A3B8;
-  --sk-subtle:  rgba(15,23,42,0.08);
-  --sk-strong:  rgba(15,23,42,0.16);
+  --sk-raised:  #F1F5F9;
+  --sk-input:   #F1F5F9;
+  --sk-1:       #1A1A1A;
+  --sk-2:       #4B5563;
+  --sk-3:       #9CA3AF;
+  --sk-subtle:  #E2E8F0;
+  --sk-strong:  #CBD5E1;
 
-  --sk-blur-bg:      rgba(248,250,252,0.85);
-  --sk-backdrop:     rgba(248,250,252,0.75);
+  --sk-blur-bg:      rgba(249,249,249,0.85);
+  --sk-backdrop:     rgba(249,249,249,0.75);
   --sk-bg-glow:      none;
-  --sk-card-shadow:  0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.05),
-                     inset 0 1px 0 rgba(255,255,255,0.9);
-  --sk-card-hover:   0 4px 16px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06),
-                     inset 0 1px 0 rgba(255,255,255,0.9);
-  --sk-skeleton-a:   #EDF0F5;
+  --sk-card-shadow:  0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.03),
+                     inset 0 0 0 1px var(--sk-subtle);
+  --sk-card-hover:   0 10px 25px rgba(0,0,0,0.05), 0 4px 10px rgba(0,0,0,0.03),
+                     inset 0 0 0 1px var(--sk-accent);
+  --sk-skeleton-a:   #F1F5F9;
   --sk-skeleton-b:   #E2E8F0;
 }
 
-/* ─── Dark mode overrides ────────────────────────────────────── */
+/* ─── Dark mode (Midnight Slate) ─────────────────────────────── */
 .dark {
-  --sk-base:    #09111F;
-  --sk-surface: #0F1B2D;
-  --sk-raised:  #162033;
-  --sk-input:   #1A2540;
-  --sk-1:       #F0F4F8;
-  --sk-2:       #8A9BB0;
-  --sk-3:       #4A5A6E;
+  --sk-base:    #0F172A;
+  --sk-surface: #1E293B;
+  --sk-raised:  #334155;
+  --sk-input:   #334155;
+  --sk-1:       #F8FAFC;
+  --sk-2:       #94A3B8;
+  --sk-3:       #64748B;
   --sk-subtle:  rgba(255,255,255,0.06);
   --sk-strong:  rgba(255,255,255,0.14);
 
-  --sk-blur-bg:      rgba(15,27,45,0.85);
-  --sk-backdrop:     rgba(9,17,31,0.75);
-  --sk-bg-glow:      radial-gradient(ellipse 80% 60% at 20% -10%, rgba(6,182,212,0.04) 0%, transparent 60%);
+  --sk-blur-bg:      rgba(15,23,42,0.85);
+  --sk-backdrop:     rgba(15,23,42,0.75);
+  --sk-bg-glow:      radial-gradient(ellipse 80% 60% at 20% -10%, rgba(99,102,241,0.05) 0%, transparent 60%);
   --sk-card-shadow:  0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3),
                      inset 0 1px 0 rgba(255,255,255,0.04);
-  --sk-card-hover:   0 4px 16px rgba(0,0,0,0.55), 0 2px 6px rgba(0,0,0,0.35),
-                     inset 0 1px 0 rgba(255,255,255,0.04);
-  --sk-skeleton-a:   #0F1B2D;
-  --sk-skeleton-b:   #162033;
+  --sk-card-hover:   0 10px 25px rgba(0,0,0,0.5), 0 4px 10px rgba(0,0,0,0.3),
+                     inset 0 0 0 1px var(--sk-accent);
+  --sk-skeleton-a:   #1E293B;
+  --sk-skeleton-b:   #334155;
 
   /* dark-mode shadow tokens */
   --shadow-sm:    0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
@@ -93,6 +93,10 @@ html {
   -moz-osx-font-smoothing: grayscale;
 }
 
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Lexend', sans-serif;
+}
+
 body {
   margin: 0;
   min-width: 320px;
@@ -104,7 +108,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid #06B6D4;
+  outline: 2px solid var(--sk-accent);
   outline-offset: 2px;
 }
 
@@ -112,7 +116,7 @@ body {
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--sk-subtle); border-radius: 10px; }
-::-webkit-scrollbar-thumb:hover { background: #06B6D4; }
+::-webkit-scrollbar-thumb:hover { background: var(--sk-accent); }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
@@ -124,6 +128,7 @@ body {
 /* ─── Card surface with inner-highlight ─────────────────────── */
 .sk-card {
   box-shadow: var(--sk-card-shadow);
+  border-radius: 12px;
   transition: border-color 200ms ease, box-shadow 200ms ease, transform 200ms ease;
 }
 .sk-card:hover {
@@ -147,7 +152,7 @@ body {
 }
 
 /* ─── Shimmer button ─────────────────────────────────────────── */
-.shimmer-btn { position: relative; overflow: hidden; }
+.shimmer-btn { position: relative; overflow: hidden; border-radius: 9999px; }
 .shimmer-btn::after {
   content: '';
   position: absolute;
@@ -172,6 +177,46 @@ body {
   100% { transform: rotate(45deg) translateX(120%); }
 }
 
+/* ─── Glassmorphism Utility ─────────────────────────────────── */
+.glass-panel {
+  background: var(--sk-blur-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--sk-subtle);
+}
+
 /* ─── Landing slow spin ──────────────────────────────────────── */
 .animate-spin-slow { animation: spin-slow 6s linear infinite; }
 @keyframes spin-slow { to { transform: rotate(360deg); } }
+
+/* ─── Select / Option dark mode ─────────────────────────────── */
+select {
+  background-color: var(--sk-input);
+  color: var(--sk-1);
+  border-color: var(--sk-subtle);
+}
+select option {
+  background-color: var(--sk-surface);
+  color: var(--sk-1);
+}
+.dark select option {
+  background-color: #1E293B;
+  color: #F8FAFC;
+}
+
+/* ─── Input / Textarea base dark fix ────────────────────────── */
+input, textarea {
+  color-scheme: light;
+}
+.dark input, .dark textarea {
+  color-scheme: dark;
+}
+
+/* ─── GSAP clip-path / overflow base ────────────────────────── */
+.gsap-reveal {
+  overflow: hidden;
+}
+.gsap-word {
+  display: inline-block;
+  will-change: transform, opacity;
+}

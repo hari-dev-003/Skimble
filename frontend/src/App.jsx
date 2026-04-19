@@ -1,25 +1,28 @@
 import { Routes, Route } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
 import { SessionProvider } from './context/SessionContext';
-import Sidebar from './components/Sidebar';
+import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import BrainstormPage from './pages/BrainstormPage';
 import JoinPage from './pages/JoinPage';
 import Whiteboard from './pages/Whiteboard';
 import Landing from './pages/Landing';
+import TemplatesPage from './pages/TemplatesPage';
+import TeamPage from './pages/TeamPage';
 
 function AppLayout() {
   return (
-    <div className="flex h-screen overflow-hidden bg-sk-base flex-col lg:flex-row">
-      <Sidebar />
-      <main className="flex-1 h-full overflow-y-auto relative bg-sk-base mt-14 lg:mt-0">
+    <div className="flex flex-col h-screen overflow-hidden bg-sk-base">
+      <Navbar />
+      <main className="flex-1 overflow-y-auto bg-sk-base">
         <Routes>
-          <Route path="/"                    element={<Home />} />
-          <Route path="/brainstorm"          element={<BrainstormPage />} />
-          <Route path="/favorites"           element={<Home initialFilter="favorites" />} />
-          <Route path="/join"                element={<JoinPage />} />
-          <Route path="/whiteboard/:sessionCode" element={<Whiteboard />} />
-          <Route path="/settings"            element={<div className="p-10 text-sk-3 text-sm">Settings coming soon…</div>} />
+          <Route path="/"           element={<Home />} />
+          <Route path="/templates"  element={<TemplatesPage />} />
+          <Route path="/team"       element={<TeamPage />} />
+          <Route path="/brainstorm" element={<BrainstormPage />} />
+          <Route path="/join"       element={<JoinPage />} />
+          <Route path="/favorites"  element={<Home initialFilter="favorites" />} />
+          <Route path="/settings"   element={<div className="p-10 text-sk-3 text-sm">Settings coming soon…</div>} />
         </Routes>
       </main>
     </div>
@@ -50,7 +53,7 @@ function App() {
               window.history.replaceState({}, document.title, window.location.pathname);
               window.location.reload();
             }}
-            className="px-4 py-2 bg-sk-accent text-sk-base rounded-xl text-sm font-semibold hover:bg-sk-accent-hi transition-colors"
+            className="px-4 py-2 bg-sk-accent text-white rounded-xl text-sm font-semibold hover:bg-sk-accent-hi transition-colors"
           >
             Retry
           </button>
@@ -63,7 +66,12 @@ function App() {
 
   return (
     <SessionProvider>
-      <AppLayout />
+      <Routes>
+        {/* Full-screen whiteboard — no top navbar, has its own top bar */}
+        <Route path="/whiteboard/:sessionCode" element={<Whiteboard />} />
+        {/* All other pages get the Navbar */}
+        <Route path="/*" element={<AppLayout />} />
+      </Routes>
     </SessionProvider>
   );
 }

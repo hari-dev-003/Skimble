@@ -6,7 +6,6 @@ const { ScanCommand, PutItemCommand, GetItemCommand, DeleteItemCommand, UpdateIt
 const { unmarshall } = require('@aws-sdk/util-dynamodb');
 
 const PARTITION_KEY = 'session_id';
-const SESSION_TTL_HOURS = 24;
 
 function generateSessionCode() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -22,9 +21,11 @@ exports.createSession = async (req, res) => {
     return res.status(401).json({ error: 'Authentication required.' });
   }
 
+  const initialElements = req.body?.initialElements;
+  const canvasData = Array.isArray(initialElements) ? JSON.stringify(initialElements) : '[]';
+
   const code = generateSessionCode();
   const now = Math.floor(Date.now() / 1000);
-  const expiresAt = now + SESSION_TTL_HOURS * 3600;
 
   const params = {
     TableName: SESSION_TABLE_NAME,
@@ -32,9 +33,8 @@ exports.createSession = async (req, res) => {
       [PARTITION_KEY]: { S: code },
       hostUserId: { S: hostUserId },
       hostEmail: { S: hostEmail },
-      canvasElements: { S: '[]' },
+      canvasElements: { S: canvasData },
       createdAt: { N: now.toString() },
-      expiresAt: { N: expiresAt.toString() },
       isActive: { BOOL: true },
     },
     ConditionExpression: 'attribute_not_exists(session_id)',
@@ -43,10 +43,9 @@ exports.createSession = async (req, res) => {
   try {
     const command = new PutItemCommand(params);
     await dynamoDB.send(command);
-    res.status(201).json({ code, hostEmail, createdAt: now, expiresAt });
+    res.status(201).json({ code, hostEmail, createdAt: now });
   } catch (error) {
     if (error.name === 'ConditionalCheckFailedException') {
-      // Rare collision — retry with new code
       return exports.createSession(req, res);
     }
     console.error('Error creating session:', error);
@@ -72,17 +71,12 @@ exports.getSession = async (req, res) => {
       return res.status(404).json({ error: 'Session not found.' });
     }
     const session = unmarshall(result.Item);
-    const now = Math.floor(Date.now() / 1000);
-    if (session.expiresAt && session.expiresAt < now) {
-      return res.status(410).json({ error: 'Session has expired.' });
-    }
     res.status(200).json({
       code: session.session_id,
       hostUserId: session.hostUserId,
       hostEmail: session.hostEmail,
       canvasElements: JSON.parse(session.canvasElements || '[]'),
       createdAt: session.createdAt,
-      expiresAt: session.expiresAt,
       isActive: session.isActive,
     });
   } catch (error) {
@@ -119,6 +113,40 @@ exports.deleteSession = async (req, res) => {
   } catch (error) {
     console.error('Error deleting session:', error);
     res.status(500).json({ error: 'Failed to delete session.' });
+  }
+};
+
+exports.listUserSessions = async (req, res) => {
+  const userId = req.user?.sub;
+  if (!userId) return res.status(401).json({ error: 'Authentication required.' });
+
+  const params = {
+    TableName: SESSION_TABLE_NAME,
+    FilterExpression: 'hostUserId = :uid',
+    ExpressionAttributeValues: {
+      ':uid': { S: userId },
+    },
+  };
+
+  try {
+    const result = await dynamoDB.send(new ScanCommand(params));
+    const sessions = (result.Items || [])
+      .map(item => {
+        const s = unmarshall(item);
+        return {
+          code: s.session_id,
+          hostEmail: s.hostEmail,
+          createdAt: s.createdAt,
+          isActive: s.isActive,
+          elementCount: (() => { try { return JSON.parse(s.canvasElements || '[]').length; } catch { return 0; } })(),
+        };
+      })
+      .sort((a, b) => b.createdAt - a.createdAt);
+
+    res.json(sessions);
+  } catch (error) {
+    console.error('Error listing sessions:', error);
+    res.status(500).json({ error: 'Failed to list sessions.' });
   }
 };
 

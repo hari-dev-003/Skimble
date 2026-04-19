@@ -51,14 +51,14 @@ const Sidebar = () => {
     <>
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 overflow-hidden">
-        <div className="w-8 h-8 bg-sk-accent/12 border border-sk-accent/25 rounded-lg flex items-center justify-center shrink-0">
-          <PenTool className="text-sk-accent w-4 h-4" strokeWidth={2.5} />
+        <div className="w-10 h-10 bg-sk-accent/10 border border-sk-accent/20 rounded-xl flex items-center justify-center shrink-0 group-hover:shadow-[0_0_15px_rgba(99,102,241,0.15)] transition-all">
+          <PenTool className="text-sk-accent w-5 h-5" strokeWidth={2.5} />
         </div>
         {(!isCollapsed || isMobileOpen) && (
           <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="font-black text-sm tracking-tighter uppercase text-sk-1"
+            className="font-extrabold text-base tracking-tight text-sk-1"
           >
             Skimble
           </motion.span>
@@ -164,9 +164,9 @@ const Sidebar = () => {
     <>
       {/* Mobile Header */}
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-sk-surface border-b border-sk-subtle flex items-center px-5 z-50 justify-between">
-        <div className="flex items-center gap-2">
-          <PenTool className="text-sk-accent w-4 h-4" />
-          <span className="text-sk-1 font-black text-sm uppercase tracking-tighter">Skimble</span>
+        <div className="flex items-center gap-3">
+          <PenTool className="text-sk-accent w-5 h-5" />
+          <span className="text-sk-1 font-extrabold text-base tracking-tight">Skimble</span>
         </div>
         <div className="flex items-center gap-2">
           <button

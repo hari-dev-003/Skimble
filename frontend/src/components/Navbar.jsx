@@ -1,105 +1,198 @@
-import { useState, useEffect } from 'react';
-import { PenTool, Sparkles,Search,User,LogOut } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
-import axios from 'axios';
+import { PenTool, Bell, HelpCircle, Share2, Download, Menu, X, LogOut, Sun, Moon } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { useTheme } from '../context/ThemeContext';
 
-const Navbar = ({ onFavouritesClick }) => {
-    const [notesNumber, setNotesNumber] = useState(0);
-    const [favoritesNumber, setFavoritesNumber] = useState(0);
-    const auth = useAuth();
-    // Signout function to redirect to Cognito logout
-   const signOutRedirect = () => {
+const Navbar = () => {
+  const { pathname } = useLocation();
+  const auth = useAuth();
+  const { isDark, toggle } = useTheme();
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const avatarRef = useRef(null);
+
+  const tabs = [
+    { label: 'Dashboard', path: '/' },
+    { label: 'Templates', path: '/templates' },
+    { label: 'Team', path: '/team' },
+  ];
+
+  const userProfile = auth.user?.profile;
+  const userEmail = userProfile?.email || '';
+  const userDisplayName =
+    userProfile?.name || userProfile?.given_name ||
+    userProfile?.preferred_username || userEmail || 'User';
+  const userInitial = (
+    userDisplayName === 'User' ? userEmail?.[0] : userDisplayName?.[0] || 'U'
+  ).toUpperCase();
+
+  const handleLogout = () => {
+    auth.removeUser();
     const clientId = import.meta.env.VITE_COGNITO_CLIENT_ID;
     const logoutUri = import.meta.env.VITE_COGNITO_REDIRECT_URI;
-    const cognitoDomain = import.meta.env.VITE_COGNITO_DOMAIN;
-    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+    const domain = import.meta.env.VITE_COGNITO_DOMAIN;
+    window.location.href = `${domain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
   };
 
-    // Fetch notes and favorites count from the backend or state management
-    const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+  const isActive = (path) => {
+    if (path === '/') return pathname === '/' || pathname === '/favorites';
+    return pathname.startsWith(path);
+  };
 
-    const fetchNotesAndFavoritesCount = async () => {
-        axios.get(`${BACKEND_URL}/api/details/`)
-            .then(response => {
-                setNotesNumber(response.data.length);
-                const favoritesCount = response.data.filter(note => note.favourite).length;
-                setFavoritesNumber(favoritesCount);
-
-            })
-            .catch(error => {
-                console.error("Error fetching notes:", error);
-            });
+  useEffect(() => {
+    const handler = (e) => {
+      if (avatarRef.current && !avatarRef.current.contains(e.target)) setAvatarOpen(false);
     };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
-    useEffect(() => {
-        fetchNotesAndFavoritesCount();
-    }, []);
+  return (
+    <header className="h-14 bg-sk-surface border-b border-sk-subtle flex items-center px-4 sm:px-6 z-50 relative shrink-0">
+      {/* Logo */}
+      <Link to="/" className="flex items-center gap-2.5 mr-6 shrink-0 group">
+        <div className="w-8 h-8 bg-sk-accent rounded-lg flex items-center justify-center shadow-sm group-hover:bg-sk-accent-hi transition-colors">
+          <PenTool size={15} className="text-white" strokeWidth={2.5} />
+        </div>
+        <span className="font-bold text-sk-1 text-base tracking-tight">Skimble</span>
+      </Link>
 
+      {/* Nav Tabs — Desktop */}
+      <nav className="hidden sm:flex items-center gap-0.5 flex-1">
+        {tabs.map(tab => (
+          <Link
+            key={tab.path}
+            to={tab.path}
+            className={`relative px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              isActive(tab.path)
+                ? 'text-sk-accent'
+                : 'text-sk-2 hover:text-sk-1 hover:bg-sk-raised'
+            }`}
+          >
+            {tab.label}
+            {isActive(tab.path) && (
+              <span className="absolute bottom-0 left-3 right-3 h-0.5 bg-sk-accent rounded-full" />
+            )}
+          </Link>
+        ))}
+      </nav>
 
-    return (
-        <>
-        {/* Navbar */}
-            <nav className="min-w-screen h-[80px] bg-white border-gray-700 shadow-sm backdrop-blur-md fixed top-0 left-0 right-0 z-50">
-                <div className="flex justify-around items-center h-full px-6 py-4">
-                    {/* Left Container */}
-                    <div className="flex items-center justify-around space-x-5 ml-4">
-                        <div className="flex items-center space-x-2 animate-fade-in">
-                            <PenTool className="w-8 h-8 text-purple-500" />
-                            <span className="text-3xl font-bold">Skimble</span>
-                        </div>
-                        
-                        <div className=' px-3 py-1 rounded-3xl bg-purple-100 text-center text-purple-700 font-medium '>
-                            {notesNumber} Notes
-                        </div>
-                        <button
-                            className='px-3 py-1 rounded-3xl bg-yellow-100 text-center text-yellow-700 font-medium flex items-center hover:bg-yellow-200 transition-colors duration-200'
-                            onClick={onFavouritesClick}
-                        >
-                            <span className="mr-1">⭐</span>{favoritesNumber} Favourites
-                        </button>
-                        <div className="flex items-center  space-x-2">
-                            <Sparkles className="w-5 h-5 text-yellow-500" />
-                            <span className="text-lg">Premium</span>
-                        </div>
-                    </div>
+      <div className="flex-1 sm:hidden" />
 
-                        {/* Right Container */}
-                    <div className="flex items-center justify-around space-x-4">
-                        <div className="relative group">
-                            <Search className={`absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 group-focus-within:text-purple-500 transition-colors`} />
-                            <input
-                                type="text"
-                                placeholder="Search notes, tags..."
-                                //   value={searchTerm}
-                                //   onChange={(e) => setSearchTerm(e.target.value)}
-                                className={`pl-10 pr-4 py-2 border border-gray-300 bg-white rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 w-64 shadow-sm`}
-                            />
-                        </div>
-                        {/* User Profile */}
-                        <div className={`flex items-center space-x-3 px-4 py-2 bg-gray-50 rounded-lg border border-gray-200`}>
-                            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center shadow-lg">
-                                <User className="w-4 h-4 text-white" />
-                            </div>
-                            <div>
-                                <div className={`text-sm font-semibold text-gray-900`}>{auth.user?.profile.email}</div>
-                                <div className={`text-xs text-gray-500`}>{auth.user?.profile.email}</div>
-                            </div>
-                        </div>
+      {/* Right Actions — Desktop */}
+      <div className="hidden sm:flex items-center gap-1.5">
+        <button
+          onClick={toggle}
+          className="p-2 text-sk-3 hover:text-sk-1 rounded-lg hover:bg-sk-raised transition-colors"
+          title={isDark ? 'Light mode' : 'Dark mode'}
+        >
+          {isDark ? <Sun size={17} /> : <Moon size={17} />}
+        </button>
+        <button className="p-2 text-sk-3 hover:text-sk-1 rounded-lg hover:bg-sk-raised transition-colors">
+          <Bell size={17} />
+        </button>
+        <button className="p-2 text-sk-3 hover:text-sk-1 rounded-lg hover:bg-sk-raised transition-colors">
+          <HelpCircle size={17} />
+        </button>
+        <div className="w-px h-5 bg-sk-subtle mx-1" />
+        <button className="px-3 py-1.5 text-sm font-medium text-sk-2 border border-sk-subtle rounded-lg hover:bg-sk-raised transition-colors flex items-center gap-1.5">
+          <Download size={13} />
+          Export
+        </button>
+        <button className="px-3 py-1.5 text-sm font-medium text-white bg-sk-accent rounded-lg hover:bg-sk-accent-hi transition-colors flex items-center gap-1.5 shadow-sm">
+          <Share2 size={13} />
+          Share
+        </button>
 
-                        <button
-                            onClick={()=>{signOutRedirect()}}
-                            className={`flex items-center space-x-2 px-4 py-2 text-gray-600 cursor-pointer hover:text-red-600 transition-colors duration-200 rounded-lg hover:bg-red-50`}
-                        >
-                            <LogOut className="w-4 h-4" />
-                            <span>Logout</span>
-                        </button>
-                    </div>
-                    
-                </div>
-            </nav>
-        </>
-    )
-}
+        {/* Avatar + dropdown */}
+        <div ref={avatarRef} className="relative ml-1">
+          <button
+            onClick={() => setAvatarOpen(!avatarOpen)}
+            className="w-8 h-8 rounded-full bg-sk-accent/10 border border-sk-accent/25 flex items-center justify-center text-sk-accent text-sm font-semibold hover:bg-sk-accent/20 transition-colors"
+            title={userEmail}
+          >
+            {userInitial}
+          </button>
+
+          {avatarOpen && (
+            <div className="absolute right-0 top-full mt-2 w-52 bg-sk-surface border border-sk-subtle rounded-xl shadow-lg py-1.5 z-50">
+              <div className="px-3 py-2 border-b border-sk-subtle mb-1">
+                <p className="text-xs font-semibold text-sk-1 truncate">{userDisplayName}</p>
+                <p className="text-xs text-sk-3 truncate">{userEmail}</p>
+              </div>
+              <button
+                onClick={toggle}
+                className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-sk-2 hover:bg-sk-raised hover:text-sk-1 transition-colors"
+              >
+                {isDark ? <Sun size={14} /> : <Moon size={14} />}
+                {isDark ? 'Light Mode' : 'Dark Mode'}
+              </button>
+              <Link
+                to="/settings"
+                onClick={() => setAvatarOpen(false)}
+                className="flex items-center gap-2.5 px-3 py-2 text-sm text-sk-2 hover:bg-sk-raised hover:text-sk-1 transition-colors"
+              >
+                Settings
+              </Link>
+              <div className="border-t border-sk-subtle mt-1 pt-1">
+                <button
+                  onClick={handleLogout}
+                  className="w-full flex items-center gap-2.5 px-3 py-2 text-sm text-sk-danger hover:bg-sk-danger/5 transition-colors"
+                >
+                  <LogOut size={14} />
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Menu Toggle */}
+      <button
+        onClick={() => setMobileOpen(!mobileOpen)}
+        className="sm:hidden p-2 text-sk-3 hover:text-sk-1 rounded-lg"
+      >
+        {mobileOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {/* Mobile Dropdown */}
+      {mobileOpen && (
+        <div className="sm:hidden absolute top-14 left-0 right-0 bg-sk-surface border-b border-sk-subtle shadow-lg z-50 px-4 py-3 space-y-1">
+          {tabs.map(tab => (
+            <Link
+              key={tab.path}
+              to={tab.path}
+              onClick={() => setMobileOpen(false)}
+              className={`block px-3 py-2.5 text-sm font-medium rounded-lg transition-colors ${
+                isActive(tab.path)
+                  ? 'bg-sk-accent/10 text-sk-accent'
+                  : 'text-sk-2 hover:bg-sk-raised hover:text-sk-1'
+              }`}
+            >
+              {tab.label}
+            </Link>
+          ))}
+          <div className="pt-2 border-t border-sk-subtle flex gap-2">
+            <Link
+              to="/join"
+              onClick={() => setMobileOpen(false)}
+              className="flex-1 px-3 py-2 text-sm font-medium text-center border border-sk-subtle rounded-lg text-sk-2 hover:bg-sk-raised"
+            >
+              Join Session
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="flex-1 px-3 py-2 text-sm font-medium text-center text-sk-danger border border-sk-danger/20 rounded-lg hover:bg-sk-danger/5"
+            >
+              Sign Out
+            </button>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+};
 
 export default Navbar;

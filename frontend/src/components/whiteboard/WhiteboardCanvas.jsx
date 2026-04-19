@@ -1,10 +1,13 @@
 import { useRef, useState, useEffect, useCallback } from 'react';
 import { Stage, Layer, Rect, Ellipse, Line, Arrow, Text, Transformer, Group, RegularPolygon } from 'react-konva';
+import { useTheme } from '../../context/ThemeContext';
 
 const PARTICIPANT_COLORS = [
   '#8B5CF6', '#3B82F6', '#10B981', '#F59E0B',
   '#EF4444', '#EC4899', '#06B6D4', '#84CC16',
 ];
+
+const STICKY_COLORS = ['#FEF08A', '#BBF7D0', '#BAE6FD', '#FBCFE8', '#DDD6FE', '#FED7AA'];
 
 function RemoteCursor({ x, y, username, color }) {
   const displayText = username || 'User';
@@ -17,8 +20,9 @@ function RemoteCursor({ x, y, username, color }) {
   );
 }
 
-function ElementRenderer({ element, onSelect, onDragEnd, onTransformEnd, tool }) {
+function ElementRenderer({ element, onSelect, onDragEnd, onTransformEnd, tool, onDblClickSticky, isEditing }) {
   const shapeRef = useRef(null);
+  const { isDark } = useTheme();
 
   const commonProps = {
     ref: shapeRef,
@@ -39,20 +43,110 @@ function ElementRenderer({ element, onSelect, onDragEnd, onTransformEnd, tool })
     },
   };
 
+  // Helper to resolve theme-aware colors for default text/strokes
+  const resolveColor = (color, isText = false) => {
+    if (!color) return isText ? (isDark ? '#F8FAFC' : '#1A1A1A') : 'transparent';
+    // If color is the default dark or default light, make it theme-aware
+    const normalized = color.toLowerCase();
+    if (normalized === '#1a1a1a' || normalized === '#ffffff') {
+      return isDark ? '#F8FAFC' : '#1A1A1A';
+    }
+    return color;
+  };
+
   switch (element.type) {
     case 'rect':
       return <Rect {...commonProps} width={element.width} height={element.height} fill={element.fill} stroke={element.stroke} strokeWidth={element.strokeWidth} cornerRadius={4} />;
     case 'circle':
       return <Ellipse {...commonProps} radiusX={element.radiusX} radiusY={element.radiusY} fill={element.fill} stroke={element.stroke} strokeWidth={element.strokeWidth} />;
     case 'line':
-      return <Line {...commonProps} points={element.points} stroke={element.stroke} strokeWidth={element.strokeWidth} lineCap="round" lineJoin="round" fill="transparent" />;
+      return <Line {...commonProps} points={element.points} stroke={resolveColor(element.stroke)} strokeWidth={element.strokeWidth} lineCap="round" lineJoin="round" fill="transparent" />;
     case 'arrow':
-      return <Arrow {...commonProps} points={element.points} stroke={element.stroke} strokeWidth={element.strokeWidth} fill={element.stroke} pointerLength={10} pointerWidth={8} />;
+      return <Arrow {...commonProps} points={element.points} stroke={resolveColor(element.stroke)} strokeWidth={element.strokeWidth} fill={resolveColor(element.stroke)} pointerLength={10} pointerWidth={8} />;
     case 'text':
-      return <Text {...commonProps} text={element.text || ''} fontSize={element.fontSize || 16} fontFamily={element.fontFamily || 'Aptos, sans-serif'} fill={element.fill} strokeWidth={0} wrap="word" />;
+      return <Text {...commonProps} visible={!isEditing} text={element.text || ''} fontSize={element.fontSize || 16} fontFamily={element.fontFamily || 'Aptos, sans-serif'} fill={resolveColor(element.fill, true)} strokeWidth={0} wrap="word" />;
     case 'pen':
     case 'freehand':
-      return <Line {...commonProps} points={element.points} stroke={element.stroke} strokeWidth={element.strokeWidth} tension={0.4} lineCap="round" lineJoin="round" fill="transparent" />;
+      return <Line {...commonProps} points={element.points} stroke={resolveColor(element.stroke)} strokeWidth={element.strokeWidth} tension={0.4} lineCap="round" lineJoin="round" fill="transparent" />;
+    case 'sticky': {
+      const w = element.width || 200;
+      const h = element.height || 200;
+      const dogEarSize = 24;
+      
+      // Determine dot colors based on background
+      const dotColors = ['#ff5f57', '#ffbd2e', '#28c941']; // macOS style window dots
+
+      return (
+        <Group
+          {...commonProps}
+          onDblClick={(e) => { if (tool === 'select') onDblClickSticky?.(element.id, e); }}
+          onDblTap={(e) => { if (tool === 'select') onDblClickSticky?.(element.id, e); }}
+        >
+          {/* Main Paper */}
+          <Rect
+            width={w}
+            height={h}
+            fill={element.fill || '#FEF08A'}
+            cornerRadius={4}
+            shadowColor="rgba(0,0,0,0.12)"
+            shadowBlur={10}
+            shadowOffsetY={6}
+          />
+          
+          {/* Top Bar / Handle */}
+          <Rect
+            width={w}
+            height={32}
+            fill="rgba(0,0,0,0.04)"
+            cornerRadius={[4, 4, 0, 0]}
+          />
+
+          {/* Decorative dots */}
+          <Group x={12} y={12}>
+            {dotColors.map((c, i) => (
+              <Ellipse key={i} x={i * 14} y={0} radiusX={3.5} radiusY={3.5} fill={c} opacity={0.8} />
+            ))}
+          </Group>
+
+          {/* Dog-ear corner (bottom right) */}
+          <Line
+            points={[
+              w - dogEarSize, h,
+              w, h,
+              w, h - dogEarSize
+            ]}
+            fill="rgba(0,0,0,0.08)"
+            closed
+          />
+          <Line
+            points={[
+              w - dogEarSize, h,
+              w - dogEarSize, h - dogEarSize,
+              w, h - dogEarSize
+            ]}
+            fill="rgba(0,0,0,0.03)"
+            stroke="rgba(0,0,0,0.05)"
+            strokeWidth={1}
+            closed
+          />
+
+          <Text
+            x={16}
+            y={44}
+            width={w - 32}
+            height={h - 60}
+            visible={!isEditing}
+            text={element.text || ''}
+            fontSize={element.fontSize || 14}
+            fontFamily="'Lexend', sans-serif"
+            fill="rgba(0,0,0,0.75)"
+            wrap="word"
+            lineHeight={1.5}
+            fontStyle="500"
+          />
+        </Group>
+      );
+    }
     default:
       return null;
   }
@@ -73,6 +167,8 @@ const WhiteboardCanvas = ({
   setHistory,
   historyIndex,
   setHistoryIndex,
+  zoom = 1,
+  setZoom,
 }) => {
   const stageRef = useRef(null);
   const transformerRef = useRef(null);
@@ -81,19 +177,15 @@ const WhiteboardCanvas = ({
   const [drawingElement, setDrawingElement] = useState(null);
   const [stageSize, setStageSize] = useState({ width: 800, height: 600 });
   const [localCursor, setLocalCursor] = useState({ x: 0, y: 0 });
+  const [stagePos, setStagePos] = useState({ x: 0, y: 0 });
   const containerRef = useRef(null);
 
   /**
-   * editingText shape:
-   *   isNew: true  → no canvas element exists yet, create on confirm
-   *     { id, isNew, canvasX, canvasY, screenX, screenY, fill, opacity, fontSize }
-   *   isNew: false → editing an existing element
-   *     { id, isNew, screenX, screenY }
+   * editingText: { id, isNew, canvasX?, canvasY?, screenX, screenY, fill, opacity, fontSize, isSticky? }
    */
   const [editingText, setEditingText] = useState(null);
   const textareaRef = useRef(null);
 
-  // Ref so finalizeTextEdit always reads fresh elements without stale closure
   const elementsRef = useRef(elements);
   useEffect(() => { elementsRef.current = elements; }, [elements]);
 
@@ -113,11 +205,11 @@ const WhiteboardCanvas = ({
     if (!transformerRef.current || !stageRef.current) return;
     if (selectedId && tool === 'select') {
       const node = stageRef.current.findOne(`#${selectedId}`);
-      if (node) { 
-        transformerRef.current.nodes([node]); 
+      if (node) {
+        transformerRef.current.nodes([node]);
         transformerRef.current.borderStroke('#06b6d4');
         transformerRef.current.anchorStroke('#06b6d4');
-        transformerRef.current.getLayer()?.batchDraw(); 
+        transformerRef.current.getLayer()?.batchDraw();
       }
     } else {
       transformerRef.current.nodes([]);
@@ -139,12 +231,10 @@ const WhiteboardCanvas = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, editingText]);
 
-  // Focus textarea when editing state changes
+  // Focus textarea
   useEffect(() => {
     if (!editingText || !textareaRef.current) return;
     const ta = textareaRef.current;
-    
-    // Small timeout to ensure focus works correctly after event processing
     const timeoutId = setTimeout(() => {
       ta.focus();
       if (!editingText.isNew) {
@@ -152,7 +242,6 @@ const WhiteboardCanvas = ({
         ta.setSelectionRange(len, len);
       }
     }, 50);
-    
     return () => clearTimeout(timeoutId);
   }, [editingText]);
 
@@ -192,43 +281,53 @@ const WhiteboardCanvas = ({
   const getPointerPos = () => {
     const stage = stageRef.current;
     if (!stage) return { x: 0, y: 0 };
-    return stage.getPointerPosition() || { x: 0, y: 0 };
+    return stage.getRelativePointerPosition() || { x: 0, y: 0 };
   };
 
   const getScreenCoords = (canvasX, canvasY) => {
     const box = stageRef.current.container().getBoundingClientRect();
-    return { screenX: box.left + canvasX, screenY: box.top + canvasY };
+    return { 
+      screenX: box.left + (canvasX * zoom) + stagePos.x, 
+      screenY: box.top + (canvasY * zoom) + stagePos.y 
+    };
   };
 
-  /* ── Finalize text editing ── */
+  const handleWheel = (e) => {
+    if (!setZoom) return;
+    e.evt.preventDefault();
+    
+    const stage = stageRef.current;
+    const oldScale = zoom;
+    const pointer = stage.getPointerPosition();
+    if (!pointer) return;
+
+    const mousePointTo = {
+      x: (pointer.x - stage.x()) / oldScale,
+      y: (pointer.y - stage.y()) / oldScale,
+    };
+
+    const scaleBy = 1.1;
+    const newScale = e.evt.deltaY < 0
+      ? Math.min(zoom * scaleBy, 3)
+      : Math.max(zoom / scaleBy, 0.25);
+
+    setZoom(newScale);
+
+    const newPos = {
+      x: pointer.x - mousePointTo.x * newScale,
+      y: pointer.y - mousePointTo.y * newScale,
+    };
+    setStagePos(newPos);
+  };
+
+  /* ── Finalize text / sticky editing ── */
   const finalizeTextEdit = useCallback(() => {
     if (!editingText) return;
-    const val = textareaRef.current?.value?.trim() || '';
+    const val = textareaRef.current?.value || '';
     const currentEditingId = editingText.id;
 
-    if (editingText.isNew) {
-      if (val) {
-        addElement({
-          id: editingText.id,
-          type: 'text',
-          x: editingText.canvasX,
-          y: editingText.canvasY,
-          text: val,
-          fill: editingText.fill,
-          stroke: 'transparent',
-          strokeWidth: 0,
-          opacity: editingText.opacity,
-          fontSize: editingText.fontSize,
-          fontFamily: 'Aptos, sans-serif',
-          rotation: 0,
-          scaleX: 1,
-          scaleY: 1,
-          creatorId: userId,
-        });
-      }
-    } else {
-      // Editing existing element
-      if (val) {
+    if (editingText.isSticky) {
+      if (val.trim() || !editingText.isNew) {
         updateElement(editingText.id, { text: val });
       } else {
         const newElements = elementsRef.current.filter(el => el.id !== editingText.id);
@@ -236,14 +335,43 @@ const WhiteboardCanvas = ({
         pushHistory(newElements);
         onElementDelete(editingText.id);
       }
+    } else if (editingText.isNew) {
+      if (val.trim()) {
+        addElement({
+          id: editingText.id,
+          type: 'text',
+          x: editingText.canvasX,
+          y: editingText.canvasY,
+          text: val.trim(),
+          fill: editingText.fill,
+          stroke: 'transparent',
+          strokeWidth: 0,
+          opacity: editingText.opacity,
+          fontSize: editingText.fontSize,
+          fontFamily: 'Aptos, sans-serif',
+          rotation: 0, scaleX: 1, scaleY: 1,
+          creatorId: userId,
+        });
+      }
+    } else {
+      if (val.trim()) {
+        updateElement(editingText.id, { text: val.trim() });
+      } else {
+        const newElements = elementsRef.current.filter(el => el.id !== editingText.id);
+        setElements(newElements);
+        pushHistory(newElements);
+        onElementDelete(editingText.id);
+      }
     }
-    // Only clear if we are still editing the same element to avoid race conditions
     setEditingText(prev => prev?.id === currentEditingId ? null : prev);
   }, [editingText, userId, addElement, updateElement, setElements, pushHistory, onElementDelete]);
 
   const handleTextareaKeyDown = (e) => {
     if (e.key === 'Escape') { e.preventDefault(); finalizeTextEdit(); }
-    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); finalizeTextEdit(); }
+    if (e.key === 'Enter' && !e.shiftKey && !editingText?.isSticky) {
+      e.preventDefault();
+      finalizeTextEdit();
+    }
   };
 
   /* ── Mouse down ── */
@@ -256,21 +384,21 @@ const WhiteboardCanvas = ({
     }
 
     if (tool === 'eraser') {
-      if (!clickedOnStage && e.target.id()) {
-        const elId = e.target.id();
-        const newElements = elementsRef.current.filter(el => el.id !== elId);
-        setElements(newElements);
-        pushHistory(newElements);
-        onElementDelete(elId);
+      if (!clickedOnStage) {
+        const target = e.target;
+        const elId = target.id() || target.parent?.id?.();
+        if (elId) {
+          const newElements = elementsRef.current.filter(el => el.id !== elId);
+          setElements(newElements);
+          pushHistory(newElements);
+          onElementDelete(elId);
+        }
       }
       return;
     }
 
-    if (tool === 'text') {
-      // If clicking away while editing, finalize current edit
-      if (editingText) {
-        finalizeTextEdit();
-      }
+    if (tool === 'text' || tool === 'sticky') {
+      if (editingText) finalizeTextEdit();
       return;
     }
 
@@ -289,31 +417,62 @@ const WhiteboardCanvas = ({
   };
 
   const handleStageClick = (e) => {
-    if (tool !== 'text') return;
-    
-    // Only create text if clicking on the stage itself (empty area)
     const clickedOnStage = e.target === e.target.getStage();
     if (!clickedOnStage) return;
 
-    const pos = getPointerPos();
-    const { screenX, screenY } = getScreenCoords(pos.x, pos.y);
-
-    setEditingText({
-      id: generateId(),
-      isNew: true,
-      canvasX: pos.x,
-      canvasY: pos.y,
-      screenX,
-      screenY,
-      fill: toolProps.fill === '#ffffff' ? '#1a1a1a' : toolProps.fill,
-      opacity: toolProps.opacity,
-      fontSize: toolProps.fontSize || 18,
-    });
+    if (tool === 'text') {
+      const pos = getPointerPos();
+      const { screenX, screenY } = getScreenCoords(pos.x, pos.y);
+      setEditingText({
+        id: generateId(),
+        isNew: true,
+        canvasX: pos.x,
+        canvasY: pos.y,
+        screenX,
+        screenY,
+        fill: toolProps.fill,
+        opacity: toolProps.opacity,
+        fontSize: toolProps.fontSize || 18,
+      });
+    } else if (tool === 'sticky') {
+      const pos = getPointerPos();
+      const stickyColor = STICKY_COLORS[Math.floor(Math.random() * STICKY_COLORS.length)];
+      const newSticky = {
+        id: generateId(),
+        type: 'sticky',
+        x: pos.x - 100,
+        y: pos.y - 100,
+        width: 200,
+        height: 200,
+        fill: stickyColor,
+        stroke: 'transparent',
+        strokeWidth: 0,
+        text: '',
+        fontSize: 13,
+        opacity: 1,
+        rotation: 0,
+        scaleX: 1,
+        scaleY: 1,
+        creatorId: userId,
+      };
+      addElement(newSticky);
+      // Immediately open edit overlay for the new sticky
+      const { screenX, screenY } = getScreenCoords(pos.x - 100, pos.y - 100);
+      setEditingText({
+        id: newSticky.id,
+        isNew: false,
+        isSticky: true,
+        screenX,
+        screenY,
+        stickyWidth: 200,
+        stickyHeight: 200,
+      });
+    }
   };
 
   const handleStageMouseMove = () => {
     const pos = getPointerPos();
-    setLocalCursor(pos); // Track local cursor for the name tag
+    setLocalCursor(pos);
     onCursorMove(pos.x, pos.y);
     if (!isDrawing || !drawingElement) return;
 
@@ -347,15 +506,35 @@ const WhiteboardCanvas = ({
     setDrawingElement(null);
   };
 
-  /* ── Double-click to re-edit existing text ── */
+  /* ── Double-click to re-edit text or sticky ── */
   const handleDblClick = (e) => {
     if (tool !== 'select') return;
-    const id = e.target.id();
+    const target = e.target;
+    const id = target.id() || target.parent?.id?.();
     const el = elementsRef.current.find(x => x.id === id);
-    if (!el || el.type !== 'text') return;
-    const { screenX, screenY } = getScreenCoords(el.x, el.y);
-    setEditingText({ id, isNew: false, screenX, screenY, fontSize: el.fontSize || 18, fill: el.fill });
+    if (!el) return;
+
+    if (el.type === 'text') {
+      const { screenX, screenY } = getScreenCoords(el.x, el.y);
+      setEditingText({ id, isNew: false, screenX, screenY, fontSize: el.fontSize || 18, fill: el.fill });
+    }
   };
+
+  const handleDblClickSticky = useCallback((id) => {
+    const el = elementsRef.current.find(x => x.id === id);
+    if (!el) return;
+    const { screenX, screenY } = getScreenCoords(el.x, el.y);
+    setEditingText({
+      id,
+      isNew: false,
+      isSticky: true,
+      screenX,
+      screenY,
+      stickyWidth: (el.width || 200) * zoom,
+      stickyHeight: (el.height || 200) * zoom,
+    });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [zoom]);
 
   const handleSelect = (id, e) => {
     if (tool === 'eraser') {
@@ -386,9 +565,10 @@ const WhiteboardCanvas = ({
   };
 
   const getCursor = () => {
-    if (tool === 'select') return 'default';
+    if (tool === 'hand') return 'grab';
+    if (tool === 'select') return selectedId ? 'default' : 'default';
     if (tool === 'eraser') return 'cell';
-    // Custom black cursors for text and crosshair to ensure they are always black
+    if (tool === 'sticky') return 'copy';
     if (tool === 'text') {
       return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='4' x2='12' y2='20'%3E%3C/line%3E%3Cline x1='8' y1='4' x2='16' y2='4'%3E%3C/line%3E%3Cline x1='8' y1='20' x2='16' y2='20'%3E%3C/line%3E%3C/svg%3E") 12 12, text`;
     }
@@ -400,26 +580,38 @@ const WhiteboardCanvas = ({
     participantColorMap[uid] = PARTICIPANT_COLORS[i % PARTICIPANT_COLORS.length];
   });
 
-  const editingDefaultValue = editingText?.isNew
-    ? ''
-    : (elementsRef.current.find(el => el.id === editingText?.id)?.text || '');
+  const editingDefaultValue = editingText?.isSticky
+    ? (elementsRef.current.find(el => el.id === editingText?.id)?.text || '')
+    : editingText?.isNew
+      ? ''
+      : (elementsRef.current.find(el => el.id === editingText?.id)?.text || '');
 
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 overflow-hidden bg-[#f8f9fc]"
-      style={{ cursor: getCursor() }}
+      className="relative flex-1 overflow-hidden"
+      style={{ cursor: getCursor(), background: 'var(--sk-base)' }}
     >
-      {/* Dot grid */}
+      {/* Dot grid — theme-aware */}
       <div
         className="absolute inset-0 pointer-events-none"
-        style={{ backgroundImage: 'radial-gradient(circle, #cbd5e1 1px, transparent 1px)', backgroundSize: '24px 24px' }}
+        style={{ backgroundImage: 'radial-gradient(circle, var(--sk-strong) 1px, transparent 1px)', backgroundSize: '24px 24px' }}
       />
 
       <Stage
         ref={stageRef}
         width={stageSize.width}
         height={stageSize.height}
+        scaleX={zoom}
+        scaleY={zoom}
+        x={stagePos.x}
+        y={stagePos.y}
+        draggable={(tool === 'select' && !selectedId) || tool === 'hand'}
+        onDragEnd={(e) => {
+          if (e.target === stageRef.current) {
+            setStagePos({ x: e.target.x(), y: e.target.y() });
+          }
+        }}
         onMouseDown={handleStageMouseDown}
         onMouseMove={handleStageMouseMove}
         onMouseUp={handleStageMouseUp}
@@ -429,15 +621,25 @@ const WhiteboardCanvas = ({
         onTouchMove={handleStageMouseMove}
         onTouchEnd={handleStageMouseUp}
         onDblClick={handleDblClick}
+        onWheel={handleWheel}
         style={{ position: 'absolute', top: 0, left: 0, cursor: getCursor() }}
       >
         <Layer>
           {elements.map(el => (
-            <ElementRenderer key={el.id} element={el} onSelect={handleSelect} onDragEnd={handleDragEnd} onTransformEnd={handleTransformEnd} tool={tool} />
+            <ElementRenderer
+              key={el.id}
+              element={el}
+              isEditing={editingText?.id === el.id}
+              onSelect={handleSelect}
+              onDragEnd={handleDragEnd}
+              onTransformEnd={handleTransformEnd}
+              tool={tool}
+              onDblClickSticky={handleDblClickSticky}
+            />
           ))}
 
           {drawingElement && (
-            <ElementRenderer element={drawingElement} onSelect={() => {}} onDragEnd={() => {}} onTransformEnd={() => {}} tool="select" />
+            <ElementRenderer element={drawingElement} onSelect={() => {}} onDragEnd={() => {}} onTransformEnd={() => {}} tool="select" onDblClickSticky={() => {}} />
           )}
 
           <Transformer
@@ -448,19 +650,17 @@ const WhiteboardCanvas = ({
         </Layer>
 
         <Layer listening={false}>
-          {/* Render remote cursors with name tags */}
           {Object.entries(remoteCursors).map(([uid, cursor]) => (
             <RemoteCursor key={uid} x={cursor.x} y={cursor.y} username={cursor.name || 'User'} color={participantColorMap[uid] || '#8B5CF6'} />
           ))}
-          {/* Render local user's name tag next to their cursor position */}
           {localCursor && (
             <RemoteCursor x={localCursor.x} y={localCursor.y} username={userEmail} color="#06b6d4" />
           )}
         </Layer>
       </Stage>
 
-      {/* Text textarea — appears at click position; element created only on confirm */}
-      {editingText && (
+      {/* Text editing overlay */}
+      {editingText && !editingText.isSticky && (
         <textarea
           key={editingText.id}
           ref={textareaRef}
@@ -469,7 +669,7 @@ const WhiteboardCanvas = ({
           onKeyDown={handleTextareaKeyDown}
           onPointerDown={(e) => e.stopPropagation()}
           onMouseDown={(e) => e.stopPropagation()}
-          className="fixed z-50 bg-white/90 backdrop-blur-xl border border-cyan-500/30 rounded-2xl shadow-premium p-4 resize-none outline-none min-w-[200px] min-h-[60px] text-slate-800 placeholder:text-slate-300 focus:border-cyan-500/50"
+          className="fixed z-50 border rounded-2xl shadow-lg p-4 resize-none outline-none min-w-[200px] min-h-[60px] placeholder:opacity-40 focus:border-cyan-500/50"
           style={{
             left: editingText.screenX,
             top: editingText.screenY,
@@ -478,9 +678,44 @@ const WhiteboardCanvas = ({
             lineHeight: 1.5,
             transform: 'translate(-10px, -10px)',
             fontWeight: 600,
+            background: 'var(--sk-surface)',
+            color: 'var(--sk-1)',
+            borderColor: 'var(--sk-accent)',
           }}
           placeholder="Start typing..."
           rows={1}
+          spellCheck={false}
+          autoFocus
+        />
+      )}
+
+      {/* Sticky note editing overlay */}
+      {editingText?.isSticky && (
+        <textarea
+          key={`sticky-${editingText.id}`}
+          ref={textareaRef}
+          defaultValue={editingDefaultValue}
+          onBlur={finalizeTextEdit}
+          onKeyDown={handleTextareaKeyDown}
+          onPointerDown={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
+          className="fixed z-50 resize-none outline-none p-4 pt-11"
+          style={{
+            left: editingText.screenX,
+            top: editingText.screenY,
+            width: editingText.stickyWidth || 200 * zoom,
+            height: editingText.stickyHeight || 200 * zoom,
+            fontSize: `${14 * zoom}px`,
+            fontFamily: "'Lexend', sans-serif",
+            lineHeight: 1.5,
+            background: 'transparent',
+            color: 'rgba(0,0,0,0.8)',
+            borderRadius: '4px',
+            border: '2px solid rgba(6,182,212,0.6)',
+            boxShadow: '0 0 0 3px rgba(6,182,212,0.15)',
+            fontWeight: 500,
+          }}
+          placeholder="Add a note..."
           spellCheck={false}
           autoFocus
         />

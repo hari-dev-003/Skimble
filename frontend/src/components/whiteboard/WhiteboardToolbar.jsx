@@ -1,183 +1,244 @@
-import { 
-  MousePointer2, 
-  Square, 
-  Circle, 
-  Minus, 
-  MoveRight, 
-  Type, 
-  Pen, 
-  Eraser, 
-  Undo2, 
-  Redo2, 
-  Trash2,
-  ChevronUp,
-  Palette,
-  Layers
+import {
+  MousePointer2, Square, Circle, Minus, MoveRight,
+  Type, Pen, Eraser, Undo2, Redo2, Trash2, Palette,
+  StickyNote, Hand, MoreHorizontal, X
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import { useState, useEffect, useRef, memo } from 'react';
 
-const TOOLS = [
+const ALL_TOOLS = [
   { id: 'select', icon: MousePointer2, label: 'Select (V)' },
-  { id: 'pen', icon: Pen, label: 'Pen (P)' },
-  { id: 'rect', icon: Square, label: 'Rectangle (R)' },
-  { id: 'circle', icon: Circle, label: 'Circle (C)' },
-  { id: 'line', icon: Minus, label: 'Line (L)' },
-  { id: 'arrow', icon: MoveRight, label: 'Arrow (A)' },
-  { id: 'text', icon: Type, label: 'Text (T)' },
-  { id: 'eraser', icon: Eraser, label: 'Eraser (E)' },
+  { id: 'hand',   icon: Hand,          label: 'Pan (H)' },
+  { id: 'pen',    icon: Pen,           label: 'Pen (P)' },
+  { id: 'rect',   icon: Square,        label: 'Rectangle (R)' },
+  { id: 'circle', icon: Circle,        label: 'Circle (C)' },
+  { id: 'line',   icon: Minus,         label: 'Line (L)' },
+  { id: 'arrow',  icon: MoveRight,     label: 'Arrow (A)' },
+  { id: 'text',   icon: Type,          label: 'Text (T)' },
+  { id: 'sticky', icon: StickyNote,    label: 'Sticky Note (S)' },
+  { id: 'eraser', icon: Eraser,        label: 'Eraser (E)' },
+  { id: 'props',  icon: Palette,       label: 'Properties' },
+  { id: 'undo',   icon: Undo2,         label: 'Undo (Ctrl+Z)' },
+  { id: 'redo',   icon: Redo2,         label: 'Redo (Ctrl+Y)' },
+  { id: 'clear',  icon: Trash2,        label: 'Clear Canvas' },
 ];
 
-const WhiteboardToolbar = ({
-  tool,
-  setTool,
-  toolProps,
-  setToolProps,
-  onUndo,
-  onRedo,
-  onClearAll,
-  canUndo,
-  canRedo,
-}) => {
-  const [showProperties, setShowProperties] = useState(false);
+const ToolButton = memo(({ item, active, disabled, onClick, isOverflow }) => {
+  const Icon = item.icon;
 
   return (
-    <div className="fixed bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-3 sm:gap-4 w-[95vw] sm:w-auto">
-      {/* Properties Popover (Contextual) */}
-      <AnimatePresence>
-        {showProperties && (
-          <motion.div
-            initial={{ opacity: 0, y: 10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 10, scale: 0.95 }}
-            className="glass-panel rounded-2xl sm:rounded-3xl p-3 sm:p-4 flex items-center gap-4 sm:gap-6 shadow-premium mb-1 sm:mb-2 border-white/40 max-w-full overflow-x-auto no-scrollbar"
-          >
-            {/* Color Pickers */}
-            <div className="flex items-center gap-3 sm:gap-4 shrink-0">
-              <div className="flex flex-col gap-1">
-                <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 text-center sm:text-left">Stroke</span>
-                <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border-2 border-white shadow-sm cursor-pointer mx-auto sm:mx-0">
-                  <input
-                    type="color"
-                    value={toolProps.stroke}
-                    onChange={e => setToolProps(p => ({ ...p, stroke: e.target.value }))}
-                    className="absolute inset-0 w-full h-full scale-150 cursor-pointer"
-                  />
-                </div>
+    <button
+      onClick={() => onClick(item.id)}
+      disabled={disabled}
+      title={item.label}
+      className={`relative flex items-center justify-center transition-all flex-shrink-0
+        ${isOverflow ? 'w-full px-4 py-3 gap-3 justify-start hover:bg-sk-raised rounded-xl' : 'w-10 h-10 rounded-xl'}
+        ${active && !isOverflow ? 'text-white' : 'text-sk-3 hover:text-sk-1 hover:bg-sk-raised'}
+        ${disabled ? 'opacity-25 pointer-events-none' : ''}
+      `}
+    >
+      {active && !isOverflow && (
+        <motion.div
+          layoutId="active-tool-bg"
+          className="absolute inset-0 bg-sk-accent rounded-xl -z-10"
+          transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
+        />
+      )}
+      <Icon size={18} strokeWidth={active ? 2.5 : 2} />
+      {isOverflow && <span className="text-sm font-medium">{item.label}</span>}
+      {active && isOverflow && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-sk-accent" />}
+    </button>
+  );
+});
+
+ToolButton.displayName = 'ToolButton';
+
+const WhiteboardToolbar = ({
+  tool, setTool,
+  toolProps, setToolProps,
+  onUndo, onRedo, onClearAll,
+  canUndo, canRedo,
+}) => {
+  const [showProps, setShowProps] = useState(false);
+  const [showMore, setShowMore] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(ALL_TOOLS.length);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const screenWidth = window.innerWidth;
+      const targetWidth = screenWidth * 0.65;
+      const buttonWidth = 44; // 40px width + 4px gap approx
+      const count = Math.floor(targetWidth / buttonWidth);
+      setVisibleCount(Math.max(3, Math.min(count - 1, ALL_TOOLS.length)));
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const visibleTools = ALL_TOOLS.slice(0, visibleCount);
+  const overflowTools = ALL_TOOLS.slice(visibleCount);
+
+  const handleToolClick = (id) => {
+    if (id === 'undo') onUndo();
+    else if (id === 'redo') onRedo();
+    else if (id === 'clear') onClearAll();
+    else if (id === 'props') setShowProps(!showProps);
+    else setTool(id);
+    setShowMore(false);
+  };
+
+  const getIsActive = (id) => {
+    if (id === 'props') return showProps;
+    return tool === id;
+  };
+
+  const getIsDisabled = (id) => {
+    if (id === 'undo') return !canUndo;
+    if (id === 'redo') return !canRedo;
+    return false;
+  };
+
+  return (
+    <div className="fixed bottom-6 left-0 right-0 z-40 flex flex-col items-center pointer-events-none px-4">
+      <div className="pointer-events-auto relative flex flex-col items-center gap-4 w-full sm:max-w-[65%]">
+        
+        {/* Main Toolbar Pill */}
+        <div className="flex items-center gap-1 p-1.5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-sk-subtle rounded-2xl shadow-xl">
+          {visibleTools.map(item => (
+            <ToolButton 
+              key={item.id} 
+              item={item} 
+              active={getIsActive(item.id)}
+              disabled={getIsDisabled(item.id)}
+              onClick={handleToolClick}
+            />
+          ))}
+
+          {overflowTools.length > 0 && (
+            <div className="relative">
+              <button
+                onClick={() => setShowMore(!showMore)}
+                className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all
+                  ${showMore ? 'bg-sk-accent text-white shadow-md' : 'text-sk-3 hover:text-sk-1 hover:bg-sk-raised'}
+                `}
+              >
+                <MoreHorizontal size={18} />
+              </button>
+
+              <AnimatePresence>
+                {showMore && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute bottom-full mb-3 right-0 bg-white dark:bg-slate-900 border border-sk-subtle rounded-2xl shadow-2xl p-2 min-w-[200px] flex flex-col gap-1 overflow-hidden"
+                  >
+                    <p className="px-3 py-2 text-[10px] font-bold text-sk-3 uppercase tracking-widest border-b border-sk-subtle mb-1">More Tools</p>
+                    <div className="max-h-[60vh] overflow-y-auto no-scrollbar">
+                      {overflowTools.map(item => (
+                        <ToolButton 
+                          key={item.id} 
+                          item={item} 
+                          active={getIsActive(item.id)}
+                          disabled={getIsDisabled(item.id)}
+                          onClick={handleToolClick}
+                          isOverflow 
+                        />
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+
+        {/* Properties Panel */}
+        <AnimatePresence>
+          {showProps && (
+            <motion.div
+              initial={{ opacity: 0, y: 20, scale: 0.96 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.96 }}
+              className="absolute bottom-full mb-6 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border border-sk-subtle rounded-3xl p-5 shadow-2xl w-full max-w-[320px]"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <p className="text-[10px] font-bold text-sk-3 uppercase tracking-widest">Properties</p>
+                <button onClick={() => setShowProps(false)} className="text-sk-3 hover:text-sk-1 p-1">
+                  <X size={14} />
+                </button>
               </div>
-              
-              {tool !== 'pen' && tool !== 'line' && tool !== 'arrow' && (
-                <div className="flex flex-col gap-1">
-                  <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 text-center sm:text-left">Fill</span>
-                  <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded-full overflow-hidden border-2 border-white shadow-sm cursor-pointer mx-auto sm:mx-0">
+
+              <div className="space-y-5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-semibold text-sk-2">Stroke</span>
+                  <div className="w-8 h-8 rounded-full border-2 border-sk-subtle shadow-sm overflow-hidden relative cursor-pointer">
                     <input
                       type="color"
-                      value={toolProps.fill}
-                      onChange={e => setToolProps(p => ({ ...p, fill: e.target.value }))}
+                      value={toolProps.stroke}
+                      onChange={e => setToolProps(p => ({ ...p, stroke: e.target.value }))}
                       className="absolute inset-0 w-full h-full scale-150 cursor-pointer"
                     />
                   </div>
                 </div>
-              )}
-            </div>
 
-            <div className="w-px h-6 sm:h-8 bg-slate-200 shrink-0" />
+                {tool !== 'pen' && tool !== 'line' && tool !== 'arrow' && tool !== 'eraser' && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-sk-2">Fill</span>
+                    <div className="w-8 h-8 rounded-full border-2 border-sk-subtle shadow-sm overflow-hidden relative cursor-pointer">
+                      <input
+                        type="color"
+                        value={toolProps.fill}
+                        onChange={e => setToolProps(p => ({ ...p, fill: e.target.value }))}
+                        className="absolute inset-0 w-full h-full scale-150 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+                )}
 
-            {/* Range Controls */}
-            <div className="flex flex-col gap-1 shrink-0">
-              <div className="flex justify-between px-1 gap-4">
-                <span className="text-[8px] sm:text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                  {tool === 'text' ? 'Size' : 'Width'}
-                </span>
-                <span className="text-[8px] sm:text-[10px] font-bold text-cyan-600 tabular-nums">
-                  {tool === 'text' ? toolProps.fontSize : toolProps.strokeWidth}px
-                </span>
+                <div className="h-px bg-sk-subtle" />
+
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-[10px] font-bold text-sk-3 uppercase tracking-wider">{tool === 'text' ? 'Size' : 'Width'}</span>
+                    <span className="text-[10px] font-bold text-sk-accent">{tool === 'text' ? toolProps.fontSize : toolProps.strokeWidth}px</span>
+                  </div>
+                  <input
+                    type="range"
+                    min={tool === 'text' ? '12' : '1'}
+                    max={tool === 'text' ? '120' : '40'}
+                    value={tool === 'text' ? toolProps.fontSize : toolProps.strokeWidth}
+                    onChange={e => {
+                      const val = Number(e.target.value);
+                      if (tool === 'text') setToolProps(p => ({ ...p, fontSize: val }));
+                      else setToolProps(p => ({ ...p, strokeWidth: val }));
+                    }}
+                    className="w-full h-1.5 bg-sk-subtle rounded-lg appearance-none accent-sk-accent cursor-pointer"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-[10px] font-bold text-sk-3 uppercase tracking-wider">Opacity</span>
+                    <span className="text-[10px] font-bold text-sk-accent">{Math.round(toolProps.opacity * 100)}%</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="1"
+                    step="0.05"
+                    value={toolProps.opacity}
+                    onChange={e => setToolProps(p => ({ ...p, opacity: Number(e.target.value) }))}
+                    className="w-full h-1.5 bg-sk-subtle rounded-lg appearance-none accent-sk-accent cursor-pointer"
+                  />
+                </div>
               </div>
-              <input
-                type="range"
-                min={tool === 'text' ? "12" : "1"}
-                max={tool === 'text' ? "120" : "40"}
-                value={tool === 'text' ? toolProps.fontSize : toolProps.strokeWidth}
-                onChange={e => {
-                  const val = Number(e.target.value);
-                  if (tool === 'text') setToolProps(p => ({ ...p, fontSize: val }));
-                  else setToolProps(p => ({ ...p, strokeWidth: val }));
-                }}
-                className="w-24 sm:w-32 h-1 bg-slate-200 rounded-full appearance-none accent-cyan-500 cursor-pointer"
-              />
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Main Island Toolbar */}
-      <motion.div 
-        layout
-        className="glass-panel rounded-2xl sm:rounded-[2rem] p-1.5 sm:p-2 flex items-center gap-1 sm:gap-1.5 shadow-premium border-white/50 max-w-full overflow-x-auto no-scrollbar"
-      >
-        {/* Tool Section */}
-        <div className="flex items-center gap-0.5 sm:gap-1 px-1 border-r border-slate-200/50 mr-0.5 sm:mr-1">
-          {TOOLS.map(({ id, icon: Icon, label }) => (
-            <button
-              key={id}
-              onClick={() => setTool(id)}
-              className={`relative w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all group shrink-0
-                ${tool === id 
-                  ? 'bg-slate-900 text-white shadow-lg' 
-                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-900'}`}
-              title={label}
-            >
-              {tool === id && (
-                <motion.div
-                  layoutId="active-tool"
-                  className="absolute inset-0 bg-slate-900 rounded-xl sm:rounded-2xl -z-10"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              <Icon size={18} className="sm:w-5 sm:h-5" strokeWidth={tool === id ? 2.5 : 2} />
-            </button>
-          ))}
-        </div>
-
-        {/* Action Section */}
-        <div className="flex items-center gap-0.5 sm:gap-1">
-          <button
-            onClick={() => setShowProperties(!showProperties)}
-            className={`w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl transition-all shrink-0
-              ${showProperties ? 'bg-cyan-50 text-cyan-600' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-600'}`}
-            title="Object Properties"
-          >
-            <Palette size={18} className="sm:w-5 sm:h-5" />
-          </button>
-
-          <div className="w-px h-5 sm:h-6 bg-slate-200 mx-0.5 sm:mx-1 shrink-0" />
-
-          <button
-            onClick={onUndo}
-            disabled={!canUndo}
-            className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-20 transition-all shrink-0"
-            title="Undo"
-          >
-            <Undo2 size={18} className="sm:w-5 sm:h-5" />
-          </button>
-          <button
-            onClick={onRedo}
-            disabled={!canRedo}
-            className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl text-slate-400 hover:bg-slate-100 hover:text-slate-900 disabled:opacity-20 transition-all shrink-0"
-            title="Redo"
-          >
-            <Redo2 size={18} className="sm:w-5 sm:h-5" />
-          </button>
-
-          <button
-            onClick={onClearAll}
-            className="w-9 h-9 sm:w-11 sm:h-11 flex items-center justify-center rounded-xl sm:rounded-2xl text-slate-400 hover:bg-red-50 hover:text-red-500 transition-all shrink-0"
-            title="Clear Canvas"
-          >
-            <Trash2 size={18} className="sm:w-5 sm:h-5" />
-          </button>
-        </div>
-      </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 };

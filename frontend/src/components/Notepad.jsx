@@ -10,11 +10,11 @@ import { useAuth } from "react-oidc-context";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
 const CATEGORY_STYLES = {
-  Work:      { bg: 'rgba(99,102,241,0.10)',  border: 'rgba(99,102,241,0.22)', color: '#818CF8' },
-  Personal:  { bg: 'rgba(16,185,129,0.10)',  border: 'rgba(16,185,129,0.22)', color: '#34D399' },
-  Urgent:    { bg: 'rgba(239,68,68,0.10)',   border: 'rgba(239,68,68,0.22)',  color: '#F87171' },
-  Completed: { bg: 'rgba(107,114,128,0.10)', border: 'rgba(107,114,128,0.22)', color: '#9CA3AF' },
-  General:   { bg: 'rgba(6,182,212,0.10)',   border: 'rgba(6,182,212,0.22)', color: '#22D3EE' },
+  Work:      { bg: 'rgba(99,102,241,0.08)',  border: 'rgba(99,102,241,0.15)', color: '#6366F1' },
+  Personal:  { bg: 'rgba(16,185,129,0.08)',  border: 'rgba(16,185,129,0.15)', color: '#10B981' },
+  Urgent:    { bg: 'rgba(244,63,94,0.08)',   border: 'rgba(244,63,94,0.15)',  color: '#F43F5E' },
+  Completed: { bg: 'rgba(100,116,139,0.08)', border: 'rgba(100,116,139,0.15)', color: '#64748B' },
+  General:   { bg: 'rgba(99,102,241,0.08)',  border: 'rgba(99,102,241,0.15)', color: '#6366F1' },
 };
 const getCatStyle = (cat) => CATEGORY_STYLES[cat] || CATEGORY_STYLES.General;
 
