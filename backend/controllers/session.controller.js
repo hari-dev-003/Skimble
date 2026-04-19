@@ -14,10 +14,10 @@ function generateSessionCode() {
 }
 
 exports.createSession = async (req, res) => {
-  const hostUserId = req.user?.sub;
+  const userId = req.user?.sub;
   const hostEmail = req.user?.email || req.user?.username || '';
 
-  if (!hostUserId) {
+  if (!userId) {
     return res.status(401).json({ error: 'Authentication required.' });
   }
 
@@ -31,7 +31,7 @@ exports.createSession = async (req, res) => {
     TableName: SESSION_TABLE_NAME,
     Item: {
       [PARTITION_KEY]: { S: code },
-      hostUserId: { S: hostUserId },
+      userId: { S: userId },
       hostEmail: { S: hostEmail },
       canvasElements: { S: canvasData },
       createdAt: { N: now.toString() },
@@ -73,7 +73,7 @@ exports.getSession = async (req, res) => {
     const session = unmarshall(result.Item);
     res.status(200).json({
       code: session.session_id,
-      hostUserId: session.hostUserId,
+      userId: session.userId,
       hostEmail: session.hostEmail,
       canvasElements: JSON.parse(session.canvasElements || '[]'),
       createdAt: session.createdAt,
@@ -87,7 +87,7 @@ exports.getSession = async (req, res) => {
 
 exports.deleteSession = async (req, res) => {
   const { code } = req.params;
-  const userId = req.user?.sub;
+  const currentUserId = req.user?.sub;
 
   const getParams = {
     TableName: SESSION_TABLE_NAME,
@@ -100,7 +100,7 @@ exports.deleteSession = async (req, res) => {
       return res.status(404).json({ error: 'Session not found.' });
     }
     const session = unmarshall(getResult.Item);
-    if (session.hostUserId !== userId) {
+    if (session.userId !== currentUserId) {
       return res.status(403).json({ error: 'Only the host can delete this session.' });
     }
 
@@ -122,7 +122,7 @@ exports.listUserSessions = async (req, res) => {
 
   const params = {
     TableName: SESSION_TABLE_NAME,
-    FilterExpression: 'hostUserId = :uid',
+    FilterExpression: 'userId = :uid',
     ExpressionAttributeValues: {
       ':uid': { S: userId },
     },

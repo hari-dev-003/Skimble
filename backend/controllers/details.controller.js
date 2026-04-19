@@ -106,7 +106,7 @@ exports.deleteContent = async (req, res) => {
 
 exports.updateContent = async (req, res) => {
   const { boardId } = req.params;
-  const { title, content, favourite } = req.body;
+  const { title, content, favourite, category } = req.body;
   const timestamp = Math.floor(Date.now() / 1000);
   // Build dynamic UpdateExpression and ExpressionAttributeValues
   let updateExp = [];
