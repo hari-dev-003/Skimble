@@ -115,6 +115,13 @@ const Home = () => {
     setJoining(true);
     setJoinError(null);
     try {
+      // Record participation if authenticated
+      if (token) {
+        await axios.post(`${BACKEND_URL}/api/sessions/${c}/join`, {}, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+      }
+      
       const res = await axios.get(`${BACKEND_URL}/api/sessions/${c}`);
       joinSession(res.data, false);
       navigate(`/whiteboard/${c}`);

@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const jwkToPem = require('jwk-to-pem');
-const { saveCanvasState, fetchSessionElements } = require('../controllers/session.controller');
+const { saveCanvasState, fetchSessionElements, recordParticipant } = require('../controllers/session.controller');
 
 // In-memory store: Map<sessionCode, { elements: [], participants: Map<userId, {email, socketId}>, saveTimer }>
 const activeSessions = new Map();
@@ -41,6 +41,11 @@ function registerWhiteboardHandlers(io) {
       if (!sessionCode) return;
       const code = sessionCode.toUpperCase();
       socket.join(code);
+
+      // Persist participant in DB if they are authenticated
+      if (userId && !userId.startsWith('anonymous-')) {
+        await recordParticipant(code, userId);
+      }
 
       const session = await getOrCreateSession(code);
 

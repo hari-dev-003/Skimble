@@ -2,8 +2,13 @@ const dynamoDB = require('../aws');
 const { SESSION_TABLE_NAME } = require('../models/session.model');
 const crypto = require('crypto');
 
-const { ScanCommand, PutItemCommand, GetItemCommand, DeleteItemCommand, UpdateItemCommand } = require('@aws-sdk/client-dynamodb');
-const { unmarshall } = require('@aws-sdk/util-dynamodb');
+const { 
+  ScanCommand, 
+  PutCommand, 
+  GetCommand, 
+  DeleteCommand, 
+  UpdateCommand 
+} = require('@aws-sdk/lib-dynamodb');
 
 const PARTITION_KEY = 'session_id';
 
@@ -30,19 +35,20 @@ exports.createSession = async (req, res) => {
   const params = {
     TableName: SESSION_TABLE_NAME,
     Item: {
-      [PARTITION_KEY]: { S: code },
-      userId: { S: userId },
-      hostEmail: { S: hostEmail },
-      canvasElements: { S: canvasData },
-      createdAt: { N: now.toString() },
-      isActive: { BOOL: true },
+      [PARTITION_KEY]: code,
+      userId: userId,
+      hostUserId: userId, // Legacy support
+      hostEmail: hostEmail,
+      participants: new Set([userId]),
+      canvasElements: canvasData,
+      createdAt: now,
+      isActive: true,
     },
     ConditionExpression: 'attribute_not_exists(session_id)',
   };
 
   try {
-    const command = new PutItemCommand(params);
-    await dynamoDB.send(command);
+    await dynamoDB.send(new PutCommand(params));
     res.status(201).json({ code, hostEmail, createdAt: now });
   } catch (error) {
     if (error.name === 'ConditionalCheckFailedException') {
@@ -61,19 +67,18 @@ exports.getSession = async (req, res) => {
 
   const params = {
     TableName: SESSION_TABLE_NAME,
-    Key: { [PARTITION_KEY]: { S: code.toUpperCase() } },
+    Key: { [PARTITION_KEY]: code.toUpperCase() },
   };
 
   try {
-    const command = new GetItemCommand(params);
-    const result = await dynamoDB.send(command);
+    const result = await dynamoDB.send(new GetCommand(params));
     if (!result.Item) {
       return res.status(404).json({ error: 'Session not found.' });
     }
-    const session = unmarshall(result.Item);
+    const session = result.Item;
     res.status(200).json({
       code: session.session_id,
-      userId: session.userId,
+      userId: session.userId || session.hostUserId,
       hostEmail: session.hostEmail,
       canvasElements: JSON.parse(session.canvasElements || '[]'),
       createdAt: session.createdAt,
@@ -85,34 +90,38 @@ exports.getSession = async (req, res) => {
   }
 };
 
-exports.deleteSession = async (req, res) => {
+exports.joinSession = async (req, res) => {
   const { code } = req.params;
-  const currentUserId = req.user?.sub;
+  const userId = req.user?.sub;
 
-  const getParams = {
-    TableName: SESSION_TABLE_NAME,
-    Key: { [PARTITION_KEY]: { S: code.toUpperCase() } },
-  };
+  if (!userId) return res.status(401).json({ error: 'Authentication required.' });
 
   try {
-    const getResult = await dynamoDB.send(new GetItemCommand(getParams));
-    if (!getResult.Item) {
-      return res.status(404).json({ error: 'Session not found.' });
-    }
-    const session = unmarshall(getResult.Item);
-    if (session.userId !== currentUserId) {
-      return res.status(403).json({ error: 'Only the host can delete this session.' });
-    }
-
-    const deleteParams = {
-      TableName: SESSION_TABLE_NAME,
-      Key: { [PARTITION_KEY]: { S: code.toUpperCase() } },
-    };
-    await dynamoDB.send(new DeleteItemCommand(deleteParams));
-    res.status(200).json({ message: 'Session deleted.' });
+    await exports.recordParticipant(code, userId);
+    res.status(200).json({ message: 'Joined successfully' });
   } catch (error) {
-    console.error('Error deleting session:', error);
-    res.status(500).json({ error: 'Failed to delete session.' });
+    console.error('Error joining session:', error);
+    res.status(500).json({ error: 'Failed to join session.' });
+  }
+};
+
+exports.recordParticipant = async (code, userId) => {
+  if (!userId || userId.startsWith('anonymous-')) return;
+  
+  const params = {
+    TableName: SESSION_TABLE_NAME,
+    Key: { [PARTITION_KEY]: code.toUpperCase() },
+    UpdateExpression: 'ADD participants :u',
+    ExpressionAttributeValues: {
+      ':u': new Set([userId])
+    },
+    ConditionExpression: 'attribute_exists(session_id)'
+  };
+  
+  try {
+    await dynamoDB.send(new UpdateCommand(params));
+  } catch (err) {
+    // Session might not exist yet or other issues, ignore silently
   }
 };
 
@@ -122,17 +131,16 @@ exports.listUserSessions = async (req, res) => {
 
   const params = {
     TableName: SESSION_TABLE_NAME,
-    FilterExpression: 'userId = :uid',
+    FilterExpression: 'userId = :uid OR hostUserId = :uid OR contains(participants, :uid)',
     ExpressionAttributeValues: {
-      ':uid': { S: userId },
+      ':uid': userId,
     },
   };
 
   try {
     const result = await dynamoDB.send(new ScanCommand(params));
     const sessions = (result.Items || [])
-      .map(item => {
-        const s = unmarshall(item);
+      .map(s => {
         return {
           code: s.session_id,
           hostEmail: s.hostEmail,
@@ -150,19 +158,46 @@ exports.listUserSessions = async (req, res) => {
   }
 };
 
+exports.deleteSession = async (req, res) => {
+  const { code } = req.params;
+  const currentUserId = req.user?.sub;
+
+  const params = {
+    TableName: SESSION_TABLE_NAME,
+    Key: { [PARTITION_KEY]: code.toUpperCase() },
+  };
+
+  try {
+    const result = await dynamoDB.send(new GetCommand(params));
+    if (!result.Item) {
+      return res.status(404).json({ error: 'Session not found.' });
+    }
+    const session = result.Item;
+    if (session.userId !== currentUserId && session.hostUserId !== currentUserId) {
+      return res.status(403).json({ error: 'Only the host can delete this session.' });
+    }
+
+    await dynamoDB.send(new DeleteCommand(params));
+    res.status(200).json({ message: 'Session deleted.' });
+  } catch (error) {
+    console.error('Error deleting session:', error);
+    res.status(500).json({ error: 'Failed to delete session.' });
+  }
+};
+
 exports.saveCanvasState = async (code, elements) => {
   const params = {
     TableName: SESSION_TABLE_NAME,
-    Key: { [PARTITION_KEY]: { S: code } },
+    Key: { [PARTITION_KEY]: code },
     UpdateExpression: 'set canvasElements = :el',
     ExpressionAttributeValues: {
-      ':el': { S: JSON.stringify(elements) },
+      ':el': JSON.stringify(elements),
     },
     ConditionExpression: 'attribute_exists(session_id)',
   };
 
   try {
-    await dynamoDB.send(new UpdateItemCommand(params));
+    await dynamoDB.send(new UpdateCommand(params));
   } catch (error) {
     if (error.name !== 'ConditionalCheckFailedException') {
       console.error(`Error saving canvas for session ${code}:`, error);
@@ -173,14 +208,13 @@ exports.saveCanvasState = async (code, elements) => {
 exports.fetchSessionElements = async (code) => {
   const params = {
     TableName: SESSION_TABLE_NAME,
-    Key: { [PARTITION_KEY]: { S: code.toUpperCase() } },
+    Key: { [PARTITION_KEY]: code.toUpperCase() },
   };
 
   try {
-    const result = await dynamoDB.send(new GetItemCommand(params));
+    const result = await dynamoDB.send(new GetCommand(params));
     if (!result.Item) return null;
-    const session = unmarshall(result.Item);
-    return JSON.parse(session.canvasElements || '[]');
+    return JSON.parse(result.Item.canvasElements || '[]');
   } catch (error) {
     console.error(`Error fetching elements for session ${code}:`, error);
     return null;
