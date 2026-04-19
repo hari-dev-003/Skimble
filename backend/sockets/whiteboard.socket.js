@@ -118,15 +118,21 @@ function registerWhiteboardHandlers(io) {
   });
 }
 
-function handleLeave(socket, code, io) {
+async function handleLeave(socket, code, io) {
   const userId = socket.data.userId;
   const session = activeSessions.get(code);
   if (session) {
     session.participants.delete(userId);
     if (session.participants.size === 0) {
+      // Clear pending debounce and flush immediately so the dashboard
+      // sees the correct elementCount when the user navigates back.
+      if (session.saveTimer) {
+        clearTimeout(session.saveTimer);
+        session.saveTimer = null;
+      }
       if (session.dirty) {
-        saveCanvasState(code, session.elements);
         session.dirty = false;
+        await saveCanvasState(code, session.elements);
       }
       setTimeout(() => {
         const s = activeSessions.get(code);

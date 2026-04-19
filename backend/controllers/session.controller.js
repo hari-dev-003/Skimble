@@ -129,26 +129,36 @@ exports.listUserSessions = async (req, res) => {
   const userId = req.user?.sub;
   if (!userId) return res.status(401).json({ error: 'Authentication required.' });
 
-  const params = {
-    TableName: SESSION_TABLE_NAME,
-    FilterExpression: 'userId = :uid OR hostUserId = :uid OR contains(participants, :uid)',
-    ExpressionAttributeValues: {
-      ':uid': userId,
-    },
-  };
-
   try {
-    const result = await dynamoDB.send(new ScanCommand(params));
-    const sessions = (result.Items || [])
-      .map(s => {
-        return {
-          code: s.session_id,
-          hostEmail: s.hostEmail,
-          createdAt: s.createdAt,
-          isActive: s.isActive,
-          elementCount: (() => { try { return JSON.parse(s.canvasElements || '[]').length; } catch { return 0; } })(),
-        };
-      })
+    // Paginate through the full scan so no sessions are missed.
+    // ConsistentRead ensures we see canvas saves that just completed.
+    let items = [];
+    let lastKey = undefined;
+
+    do {
+      const params = {
+        TableName: SESSION_TABLE_NAME,
+        FilterExpression: 'userId = :uid OR hostUserId = :uid',
+        ExpressionAttributeValues: { ':uid': userId },
+        ConsistentRead: true,
+        ...(lastKey && { ExclusiveStartKey: lastKey }),
+      };
+      const result = await dynamoDB.send(new ScanCommand(params));
+      items = items.concat(result.Items || []);
+      lastKey = result.LastEvaluatedKey;
+    } while (lastKey);
+
+    const sessions = items
+      .filter(s => s.session_id)
+      .map(s => ({
+        code: s.session_id,
+        hostEmail: s.hostEmail || '',
+        createdAt: s.createdAt || 0,
+        isActive: s.isActive ?? true,
+        elementCount: (() => {
+          try { return JSON.parse(s.canvasElements || '[]').length; } catch { return 0; }
+        })(),
+      }))
       .sort((a, b) => b.createdAt - a.createdAt);
 
     res.json(sessions);

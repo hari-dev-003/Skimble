@@ -29,11 +29,19 @@ function colorForCode(code) {
 }
 
 function timeAgo(ts) {
+  if (!ts) return '—';
   const diff = Math.floor(Date.now() / 1000) - ts;
-  if (diff < 60) return 'just now';
+  if (diff < 0 || diff < 60) return 'just now';
   if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
   if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
   return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function boardTitle(ts) {
+  if (!ts) return 'Untitled Board';
+  return new Date(ts * 1000).toLocaleDateString('en-US', {
+    month: 'short', day: 'numeric', year: 'numeric',
+  });
 }
 
 const BoardCardSkeleton = () => (
@@ -67,14 +75,26 @@ const Home = () => {
   const userProfile = auth.user?.profile;
   const userName = userProfile?.name || userProfile?.given_name || userProfile?.email?.split('@')[0] || 'there';
 
+  const fetchBoards = async (token) => {
+    try {
+      const res = await axios.get(`${BACKEND_URL}/api/sessions`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setBoards(res.data || []);
+    } catch {
+      setBoards([]);
+    }
+  };
+
   useEffect(() => {
     if (!token) return;
-    axios.get(`${BACKEND_URL}/api/sessions`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-      .then(res => setBoards(res.data || []))
-      .catch(() => setBoards([]))
-      .finally(() => setLoadingBoards(false));
+    // Initial fetch
+    fetchBoards(token).finally(() => setLoadingBoards(false));
+    // Re-fetch after 1.5 s to pick up any canvas saves that raced with the
+    // socket leave event (saves are async; this ensures we get the final count).
+    const refresh = setTimeout(() => fetchBoards(token), 1500);
+    return () => clearTimeout(refresh);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const handleCreate = async () => {
@@ -256,14 +276,17 @@ const Home = () => {
                       </div>
 
                       <div className="p-4">
-                        <div className="flex items-start justify-between gap-2 mb-1">
-                          <span className="font-mono font-bold text-sk-1 text-sm tracking-widest uppercase">
-                            {board.code}
+                        <div className="flex items-start justify-between gap-2 mb-0.5">
+                          <span className="font-semibold text-sk-1 text-sm leading-snug truncate">
+                            {boardTitle(board.createdAt)}
                           </span>
                           <span className="text-xs text-sk-3 flex items-center gap-1 shrink-0">
                             <Clock size={11} /> {timeAgo(board.createdAt)}
                           </span>
                         </div>
+                        <p className="font-mono text-[11px] text-sk-3 tracking-widest uppercase mb-2">
+                          {board.code}
+                        </p>
                         <p className="text-xs text-sk-3 mb-3">
                           {board.elementCount > 0
                             ? `${board.elementCount} element${board.elementCount !== 1 ? 's' : ''}`
