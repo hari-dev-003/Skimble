@@ -1,0 +1,23 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Skimble">
+  <defs>
+    <linearGradient id="skimble-bg" x1="64" y1="48" x2="448" y2="464" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/>
+      <stop offset="1" stop-color="#1D4ED8"/>
+    </linearGradient>
+    <linearGradient id="skimble-sheen" x1="128" y1="96" x2="384" y2="384" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.20"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="512" height="512" rx="128" fill="url(#skimble-bg)"/>
+  <rect x="0" y="0" width="512" height="512" rx="128" fill="url(#skimble-sheen)"/>
+
+  <!-- Pen nib -->
+  <path d="M256 116 L336 200 L300 316 L256 356 L212 316 L176 200 Z" fill="#ffffff"/>
+  <path d="M256 200 L256 344" stroke="#1D4ED8" stroke-width="18" stroke-linecap="round"/>
+  <circle cx="256" cy="232" r="16" fill="#1D4ED8"/>
+
+  <!-- Skim swoosh -->
+  <path d="M150 408 Q256 456 366 380" stroke="#ffffff" stroke-width="28" stroke-linecap="round" fill="none"/>
+</svg>

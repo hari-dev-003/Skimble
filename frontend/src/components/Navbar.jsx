@@ -1,6 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from 'react-oidc-context';
-import { PenTool, Bell, HelpCircle, Share2, Download, Menu, X, LogOut, Sun, Moon } from 'lucide-react';
+import { Bell, HelpCircle, Share2, Download, Menu, X, LogOut, Sun, Moon } from 'lucide-react';
+import { LogoMark } from './Logo';
 import { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../context/ThemeContext';
 
@@ -52,9 +53,7 @@ const Navbar = () => {
     <header className="h-14 bg-sk-surface border-b border-sk-subtle flex items-center px-4 sm:px-6 z-50 relative shrink-0">
       {/* Logo */}
       <Link to="/" className="flex items-center gap-2.5 mr-6 shrink-0 group">
-        <div className="w-8 h-8 bg-sk-accent rounded-lg flex items-center justify-center shadow-sm group-hover:bg-sk-accent-hi transition-colors">
-          <PenTool size={15} className="text-white" strokeWidth={2.5} />
-        </div>
+        <LogoMark size={32} className="rounded-lg shadow-sm shrink-0" />
         <span className="font-bold text-sk-1 text-base tracking-tight">Skimble</span>
       </Link>
 

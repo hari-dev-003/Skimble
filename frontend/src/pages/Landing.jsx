@@ -1,6 +1,5 @@
 import { useNavigate } from 'react-router-dom';
 import {
-  PenTool,
   Sparkles,
   Zap,
   Users,
@@ -9,6 +8,7 @@ import {
   MousePointer2,
 } from 'lucide-react';
 import { useAuth } from 'react-oidc-context';
+import { LogoMark } from '../components/Logo';
 import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -194,9 +194,7 @@ const Landing = () => {
       {/* ── Nav ─────────────────────────────────────────────────────────── */}
       <nav ref={navRef} className="relative z-50 flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-10 h-10 bg-sk-accent/10 border border-sk-accent/20 rounded-xl flex items-center justify-center group-hover:scale-110 transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(37,99,235,0.2)]">
-            <PenTool className="w-5 h-5 text-sk-accent" strokeWidth={2.5} />
-          </div>
+          <LogoMark size={40} className="rounded-xl group-hover:scale-110 transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(37,99,235,0.35)]" />
           <span className="text-xl font-extrabold tracking-tight text-sk-1 group-hover:text-sk-accent transition-colors duration-300">
             Skimble
           </span>
@@ -409,7 +407,7 @@ const Landing = () => {
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-3 mb-6">
-              <PenTool size={20} className="text-sk-accent" />
+              <LogoMark size={28} className="rounded-lg" />
               <span className="text-xl font-extrabold tracking-tight text-sk-1">Skimble</span>
             </div>
             <p className="text-sk-2 max-w-sm mb-8 font-medium leading-relaxed">
