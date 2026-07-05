@@ -195,7 +195,7 @@ const Landing = () => {
       <nav ref={navRef} className="relative z-50 flex justify-between items-center px-8 py-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-3 group cursor-pointer" onClick={() => navigate('/')}>
           <LogoMark size={40} className="rounded-xl group-hover:scale-110 transition-all duration-500 group-hover:shadow-[0_0_20px_rgba(37,99,235,0.35)]" />
-          <span className="text-xl font-extrabold tracking-tight text-sk-1 group-hover:text-sk-accent transition-colors duration-300">
+          <span className="text-xl font-display font-extrabold tracking-tight text-sk-1 group-hover:text-sk-accent transition-colors duration-300">
             Skimble
           </span>
         </div>
@@ -408,7 +408,7 @@ const Landing = () => {
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center gap-3 mb-6">
               <LogoMark size={28} className="rounded-lg" />
-              <span className="text-xl font-extrabold tracking-tight text-sk-1">Skimble</span>
+              <span className="text-xl font-display font-extrabold tracking-tight text-sk-1">Skimble</span>
             </div>
             <p className="text-sk-2 max-w-sm mb-8 font-medium leading-relaxed">
               The next generation workspace for teams who value clarity, focus, and speed.

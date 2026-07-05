@@ -56,7 +56,7 @@ const Sidebar = () => {
           <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="font-extrabold text-base tracking-tight text-sk-1"
+            className="font-display font-extrabold text-base tracking-tight text-sk-1"
           >
             Skimble
           </motion.span>
@@ -164,7 +164,7 @@ const Sidebar = () => {
       <div className="lg:hidden fixed top-0 left-0 right-0 h-14 bg-sk-surface border-b border-sk-subtle flex items-center px-5 z-50 justify-between">
         <div className="flex items-center gap-3">
           <LogoMark size={32} className="shrink-0" />
-          <span className="text-sk-1 font-extrabold text-base tracking-tight">Skimble</span>
+          <span className="text-sk-1 font-display font-extrabold text-base tracking-tight">Skimble</span>
         </div>
         <div className="flex items-center gap-2">
           <button

@@ -51,7 +51,7 @@ export function LogoMark({ size = 40, className = '', rounded = true }) {
 export default function Logo({
   size = 40,
   showWordmark = true,
-  wordmarkClassName = 'font-extrabold tracking-tight text-sk-1',
+  wordmarkClassName = 'font-display font-extrabold tracking-tight text-sk-1',
   className = '',
 }) {
   return (

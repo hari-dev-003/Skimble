@@ -71,10 +71,10 @@ const ogSvg = `
   </g>
 
   <text x="600" y="470" text-anchor="middle" fill="url(#wm)"
-        font-family="Segoe UI, Arial, Helvetica, sans-serif" font-weight="800"
-        font-size="86" letter-spacing="-2">Skimble</text>
+        font-family="Sora, Segoe UI, Arial, Helvetica, sans-serif" font-weight="800"
+        font-size="86" letter-spacing="-3">Skimble</text>
   <text x="600" y="530" text-anchor="middle" fill="#93B4F5"
-        font-family="Segoe UI, Arial, Helvetica, sans-serif" font-weight="500"
+        font-family="'Plus Jakarta Sans', Segoe UI, Arial, Helvetica, sans-serif" font-weight="500"
         font-size="30" letter-spacing="0.5">Collaborative real-time whiteboard &amp; notes</text>
 </svg>`;
 

@@ -138,7 +138,7 @@ function ElementRenderer({ element, onSelect, onDragEnd, onTransformEnd, tool, o
             visible={!isEditing}
             text={element.text || ''}
             fontSize={element.fontSize || 14}
-            fontFamily="'Lexend', sans-serif"
+            fontFamily="'Plus Jakarta Sans', sans-serif"
             fill="rgba(0,0,0,0.75)"
             wrap="word"
             lineHeight={1.5}
@@ -706,7 +706,7 @@ const WhiteboardCanvas = ({
             width: editingText.stickyWidth || 200 * zoom,
             height: editingText.stickyHeight || 200 * zoom,
             fontSize: `${14 * zoom}px`,
-            fontFamily: "'Lexend', sans-serif",
+            fontFamily: "'Plus Jakarta Sans', sans-serif",
             lineHeight: 1.5,
             background: 'transparent',
             color: 'rgba(0,0,0,0.8)',
