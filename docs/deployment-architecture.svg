@@ -1,0 +1,223 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="3368" height="2382" viewBox="0 0 1684 1191">
+  <defs>
+    <linearGradient id="bgGrad" x1="0" y1="0" x2="1684" y2="1191" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#FFFFFF"/><stop offset="1" stop-color="#EEF2F7"/></linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="context-stroke"/></marker>
+    <marker id="arrowR" viewBox="0 0 10 10" refX="2" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M10 0 L0 5 L10 10 z" fill="context-stroke"/></marker>
+  </defs>
+  
+  <rect width="1684" height="1191" fill="url(#bgGrad)"/>
+
+  <!-- AWS Cloud boundary -->
+  <rect x="430" y="150" width="1180" height="650" rx="28" fill="#FF9900" fill-opacity="0.035" stroke="#FF9900" stroke-width="2.5" stroke-dasharray="12 9"/>
+  <rect x="454" y="129" width="188" height="42" rx="21" fill="#232F3E"/>
+  <text x="548" y="157" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="700" fill="#FF9900">AWS Cloud</text>
+
+  <!-- title -->
+  <g transform="translate(60 40) scale(0.12890625)">
+    <defs><linearGradient id="sk_bg" x1="64" y1="48" x2="448" y2="464" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#3B82F6"/><stop offset="1" stop-color="#1D4ED8"/></linearGradient></defs>
+    <rect width="512" height="512" rx="128" fill="url(#sk_bg)"/>
+    <path d="M256 116 L336 200 L300 316 L256 356 L212 316 L176 200 Z" fill="#fff"/>
+    <path d="M256 200 L256 344" stroke="#1D4ED8" stroke-width="18" stroke-linecap="round"/>
+    <circle cx="256" cy="232" r="16" fill="#1D4ED8"/>
+    <path d="M150 408 Q256 456 366 380" stroke="#fff" stroke-width="28" stroke-linecap="round" fill="none"/></g>
+  <text x="146" y="72" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="40" font-weight="800" fill="#0F172A" letter-spacing="-1">Skimble — How the Architecture Works</text>
+  <text x="148" y="106" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="20" font-weight="500" fill="#475569">A high-level walkthrough of the request &amp; data flow across the AWS deployment</text>
+
+  <!-- connectors -->
+  <path d="M338 504 L466 504" stroke="#64748B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <g>
+    <rect x="369.5" y="521.5" width="69" height="29" rx="14.5" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+    
+    <text x="404" y="541.25" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="600" fill="#64748B">HTTPS</text>
+  </g>
+  <circle cx="404" cy="474" r="19" fill="#D6242D" stroke="#fff" stroke-width="3"/>
+    <text x="404" y="481" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">1</text>
+
+  <path d="M738 504 L866 504" stroke="#64748B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <g>
+    <rect x="747" y="521.5" width="114" height="29" rx="14.5" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+    
+    <text x="804" y="541.25" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="600" fill="#64748B">REST · JWT</text>
+  </g>
+  <circle cx="804" cy="474" r="19" fill="#ED7100" stroke="#fff" stroke-width="3"/>
+    <text x="804" y="481" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">3</text>
+
+  <path d="M1138 504 L1296 504" stroke="#64748B" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+  <g>
+    <rect x="1175.5" y="521.5" width="87" height="29" rx="14.5" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+    
+    <text x="1219" y="541.25" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="600" fill="#64748B">AWS SDK</text>
+  </g>
+  <circle cx="1219" cy="474" r="19" fill="#3334B9" stroke="#fff" stroke-width="3"/>
+    <text x="1219" y="481" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">5</text>
+
+  <!-- realtime arc -->
+  <path d="M204 608 C 204 798, 1004 798, 1004 608" stroke="#0B0B0B" stroke-width="3" fill="none" marker-end="url(#arrow)" marker-start="url(#arrowR)" />
+  <g>
+    <rect x="352.4" y="765" width="503.2" height="30" rx="15" fill="#fff" stroke="#0B0B0B" stroke-width="1.5"/>
+    <g transform="translate(357.4 770) scale(0.15625)"><g fill="#010101" fill-rule="evenodd"><path style="line-height:normal;font-variant-ligatures:normal;font-variant-position:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-alternates:normal;font-variant-east-asian:normal;font-feature-settings:normal;font-variation-settings:normal;text-indent:0;text-align:start;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000;text-transform:none;text-orientation:mixed;white-space:normal;shape-padding:0;shape-margin:0;inline-size:0;isolation:auto;mix-blend-mode:normal;solid-color:#000;solid-opacity:1" d="M63.951.001C28.696.001.001 28.696.001 63.951s28.695 63.95 63.95 63.95 63.95-28.695 63.95-63.95S99.206.001 63.95.001zm0 10.679c29.484 0 53.272 23.787 53.272 53.271 0 29.485-23.788 53.272-53.272 53.272-29.484 0-53.272-23.787-53.272-53.272 0-29.484 23.788-53.271 53.272-53.271z" color="#000" font-weight="400" font-family="sans-serif" overflow="visible" fill-rule="nonzero"/><path d="M48.39 60.716c14.004-11.44 27.702-23.278 42.011-34.384-7.505 11.533-15.224 22.913-22.729 34.445-6.437.03-12.875.03-19.282-.061zM60.228 67.092c6.468 0 12.905 0 19.342.092-14.095 11.38-27.732 23.309-42.071 34.384 7.505-11.533 15.224-22.943 22.729-34.476z"/></g></g>
+    <text x="618" y="785.6" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="600" fill="#0B0B0B">Socket.IO · WebSocket (bi-directional realtime)</text>
+  </g>
+  <circle cx="354" cy="726" r="19" fill="#0B0B0B" stroke="#fff" stroke-width="3"/>
+    <text x="354" y="733" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">6</text>
+
+  <!-- auth: browser -> cognito -->
+  <path d="M204 400 C 204 254, 750 254, 870 254" stroke="#DD344C" stroke-width="3" fill="none" marker-end="url(#arrow)"  />
+  <g>
+    <rect x="456.8" y="209" width="206.4" height="30" rx="15" fill="#fff" stroke="#F3C0C7" stroke-width="1.5"/>
+    
+    <text x="560" y="229.6" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="600" fill="#DD344C">OAuth2 / OIDC → JWT</text>
+  </g>
+  <circle cx="272" cy="300" r="19" fill="#DD344C" stroke="#fff" stroke-width="3"/>
+    <text x="272" y="307" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">2</text>
+
+  <!-- cognito -> lambda JWT verify -->
+  <path d="M1004 338 L 1004 400" stroke="#DD344C" stroke-width="3" fill="none" marker-end="url(#arrow)"  stroke-dasharray="9 7"/>
+  <circle cx="1004" cy="369" r="19" fill="#DD344C" stroke="#fff" stroke-width="3"/>
+    <text x="1004" y="376" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">4</text>
+  <g>
+    <rect x="1055" y="354.5" width="114" height="29" rx="14.5" fill="#fff" stroke="#F3C0C7" stroke-width="1.5"/>
+    
+    <text x="1112" y="374.25" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="15" font-weight="600" fill="#DD344C">verify JWT</text>
+  </g>
+
+  <!-- cards -->
+  <g>
+    <rect x="75" y="409" width="268" height="208" rx="20" fill="#0f172a" opacity="0.10"/>
+    <rect x="70" y="400" width="268" height="208" rx="20" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+    <rect x="70" y="400" width="268" height="7" rx="3.5" fill="#61DAFB"/>
+    <g transform="translate(158 430) scale(0.71875)"><g fill="#61DAFB"><circle cx="64" cy="64" r="11.4"/><path d="M107.3 45.2c-2.2-.8-4.5-1.6-6.9-2.3.6-2.4 1.1-4.8 1.5-7.1 2.1-13.2-.2-22.5-6.6-26.1-1.9-1.1-4-1.6-6.4-1.6-7 0-15.9 5.2-24.9 13.9-9-8.7-17.9-13.9-24.9-13.9-2.4 0-4.5.5-6.4 1.6-6.4 3.7-8.7 13-6.6 26.1.4 2.3.9 4.7 1.5 7.1-2.4.7-4.7 1.4-6.9 2.3C8.2 50 1.4 56.6 1.4 64s6.9 14 19.3 18.8c2.2.8 4.5 1.6 6.9 2.3-.6 2.4-1.1 4.8-1.5 7.1-2.1 13.2.2 22.5 6.6 26.1 1.9 1.1 4 1.6 6.4 1.6 7.1 0 16-5.2 24.9-13.9 9 8.7 17.9 13.9 24.9 13.9 2.4 0 4.5-.5 6.4-1.6 6.4-3.7 8.7-13 6.6-26.1-.4-2.3-.9-4.7-1.5-7.1 2.4-.7 4.7-1.4 6.9-2.3 12.5-4.8 19.3-11.4 19.3-18.8s-6.8-14-19.3-18.8zM92.5 14.7c4.1 2.4 5.5 9.8 3.8 20.3-.3 2.1-.8 4.3-1.4 6.6-5.2-1.2-10.7-2-16.5-2.5-3.4-4.8-6.9-9.1-10.4-13 7.4-7.3 14.9-12.3 21-12.3 1.3 0 2.5.3 3.5.9zM81.3 74c-1.8 3.2-3.9 6.4-6.1 9.6-3.7.3-7.4.4-11.2.4-3.9 0-7.6-.1-11.2-.4-2.2-3.2-4.2-6.4-6-9.6-1.9-3.3-3.7-6.7-5.3-10 1.6-3.3 3.4-6.7 5.3-10 1.8-3.2 3.9-6.4 6.1-9.6 3.7-.3 7.4-.4 11.2-.4 3.9 0 7.6.1 11.2.4 2.2 3.2 4.2 6.4 6 9.6 1.9 3.3 3.7 6.7 5.3 10-1.7 3.3-3.4 6.6-5.3 10zm8.3-3.3c1.5 3.5 2.7 6.9 3.8 10.3-3.4.8-7 1.4-10.8 1.9 1.2-1.9 2.5-3.9 3.6-6 1.2-2.1 2.3-4.2 3.4-6.2zM64 97.8c-2.4-2.6-4.7-5.4-6.9-8.3 2.3.1 4.6.2 6.9.2 2.3 0 4.6-.1 6.9-.2-2.2 2.9-4.5 5.7-6.9 8.3zm-18.6-15c-3.8-.5-7.4-1.1-10.8-1.9 1.1-3.3 2.3-6.8 3.8-10.3 1.1 2 2.2 4.1 3.4 6.1 1.2 2.2 2.4 4.1 3.6 6.1zm-7-25.5c-1.5-3.5-2.7-6.9-3.8-10.3 3.4-.8 7-1.4 10.8-1.9-1.2 1.9-2.5 3.9-3.6 6-1.2 2.1-2.3 4.2-3.4 6.2zM64 30.2c2.4 2.6 4.7 5.4 6.9 8.3-2.3-.1-4.6-.2-6.9-.2-2.3 0-4.6.1-6.9.2 2.2-2.9 4.5-5.7 6.9-8.3zm22.2 21l-3.6-6c3.8.5 7.4 1.1 10.8 1.9-1.1 3.3-2.3 6.8-3.8 10.3-1.1-2.1-2.2-4.2-3.4-6.2zM31.7 35c-1.7-10.5-.3-17.9 3.8-20.3 1-.6 2.2-.9 3.5-.9 6 0 13.5 4.9 21 12.3-3.5 3.8-7 8.2-10.4 13-5.8.5-11.3 1.4-16.5 2.5-.6-2.3-1-4.5-1.4-6.6zM7 64c0-4.7 5.7-9.7 15.7-13.4 2-.8 4.2-1.5 6.4-2.1 1.6 5 3.6 10.3 6 15.6-2.4 5.3-4.5 10.5-6 15.5C15.3 75.6 7 69.6 7 64zm28.5 49.3c-4.1-2.4-5.5-9.8-3.8-20.3.3-2.1.8-4.3 1.4-6.6 5.2 1.2 10.7 2 16.5 2.5 3.4 4.8 6.9 9.1 10.4 13-7.4 7.3-14.9 12.3-21 12.3-1.3 0-2.5-.3-3.5-.9zM96.3 93c1.7 10.5.3 17.9-3.8 20.3-1 .6-2.2.9-3.5.9-6 0-13.5-4.9-21-12.3 3.5-3.8 7-8.2 10.4-13 5.8-.5 11.3-1.4 16.5-2.5.6 2.3 1 4.5 1.4 6.6zm9-15.6c-2 .8-4.2 1.5-6.4 2.1-1.6-5-3.6-10.3-6-15.6 2.4-5.3 4.5-10.5 6-15.5 13.8 4 22.1 10 22.1 15.6 0 4.7-5.8 9.7-15.7 13.4z"/></g></g>
+    <text x="204" y="556" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="700" fill="#0F172A">User's Browser</text>
+    <text x="204" y="584" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="500" fill="#64748B">React + Vite SPA</text>
+  </g><g>
+    <rect x="475" y="409" width="268" height="208" rx="20" fill="#0f172a" opacity="0.10"/>
+    <rect x="470" y="400" width="268" height="208" rx="20" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+    <rect x="470" y="400" width="268" height="7" rx="3.5" fill="#D6242D"/>
+    <g transform="translate(558 430) scale(1.15)">
+    <!-- Generator: Sketch 64 (93537) - https://sketch.com -->
+    <title>Icon-Architecture/64/Arch_AWS-Amplify-Console_64</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="Lamplify_linearGradient-1">
+            <stop stop-color="#BD0816" offset="0%"></stop>
+            <stop stop-color="#FF5252" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Lamplify_Icon-Architecture/64/Arch_AWS-Amplify-Console_64" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Lamplify_Icon-Architecture-BG/64/Mobile" fill="url(#Lamplify_linearGradient-1)">
+            <rect id="Lamplify_Rectangle" x="0" y="0" width="80" height="80"></rect>
+        </g>
+        <path d="M59.6107389,59.179 L39.5067389,20 L45.2577389,20 L65.3627389,59.179 L59.6107389,59.179 Z M67.8887389,59.722 L46.7587389,18.544 C46.5887389,18.21 46.2447389,18 45.8697389,18 L37.8697389,18 C37.5207389,18 37.1977389,18.181 37.0157389,18.479 C36.8347389,18.776 36.8207389,19.147 36.9797389,19.457 L58.1097389,60.636 C58.2807389,60.969 58.6247389,61.179 58.9997389,61.179 L66.9997389,61.179 C67.3477389,61.179 67.6717389,60.998 67.8527389,60.7 C68.0347389,60.403 68.0487389,60.033 67.8887389,59.722 L67.8887389,59.722 Z M47.5987389,59.179 L32.2147389,30.332 L35.3657389,25.121 L53.3407389,59.179 L47.5987389,59.179 Z M36.3097389,22.624 C36.1407389,22.305 35.8147389,22.101 35.4547389,22.091 C35.1087389,22.07 34.7567389,22.265 34.5697389,22.573 L30.2097389,29.784 C30.0267389,30.086 30.0167389,30.461 30.1817389,30.772 L46.1167389,60.65 C46.2907389,60.975 46.6307389,61.179 46.9997389,61.179 L54.9997389,61.179 C55.3497389,61.179 55.6747389,60.995 55.8557389,60.695 C56.0367389,60.395 56.0477389,60.022 55.8837389,59.712 L36.3097389,22.624 Z M14.7727389,59.179 L28.8847389,35.84 L31.7597389,41.229 L25.1337389,52.678 C24.9547389,52.988 24.9547389,53.369 25.1327389,53.679 C25.3117389,53.988 25.6417389,54.179 25.9997389,54.179 L38.6667389,54.179 L41.3327389,59.179 L14.7727389,59.179 Z M40.1487389,52.708 C39.9747389,52.383 39.6347389,52.179 39.2657389,52.179 L27.7337389,52.179 L33.7687389,41.75 C33.9427389,41.451 33.9487389,41.084 33.7867389,40.779 L29.8227389,33.346 C29.6527389,33.029 29.3267389,32.827 28.9667389,32.817 C28.5827389,32.8 28.2697389,32.992 28.0847389,33.299 L12.1437389,59.661 C11.9577389,59.971 11.9517389,60.356 12.1287389,60.67 C12.3057389,60.985 12.6377389,61.179 12.9997389,61.179 L42.9997389,61.179 C43.3507389,61.179 43.6757389,60.995 43.8567389,60.694 C44.0377389,60.392 44.0477389,60.018 43.8817389,59.708 L40.1487389,52.708 Z" id="Lamplify_AWS-Amplify-Console_Icon_64_Squid" fill="#FFFFFF"></path>
+    </g>
+</g>
+    <text x="604" y="556" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="700" fill="#0F172A">AWS Amplify</text>
+    <text x="604" y="584" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="500" fill="#64748B">Frontend Hosting &amp; CI/CD</text>
+  </g><g>
+    <rect x="875" y="409" width="268" height="208" rx="20" fill="#0f172a" opacity="0.10"/>
+    <rect x="870" y="400" width="268" height="208" rx="20" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+    <rect x="870" y="400" width="268" height="7" rx="3.5" fill="#ED7100"/>
+    <g transform="translate(958 430) scale(1.15)">
+    <!-- Generator: Sketch 64 (93537) - https://sketch.com -->
+    <title>Icon-Architecture/64/Arch_AWS-Lambda_64</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="Llambda_linearGradient-1">
+            <stop stop-color="#C8511B" offset="0%"></stop>
+            <stop stop-color="#FF9900" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Llambda_Icon-Architecture/64/Arch_AWS-Lambda_64" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Llambda_Icon-Architecture-BG/64/Compute" fill="url(#Llambda_linearGradient-1)">
+            <rect id="Llambda_Rectangle" x="0" y="0" width="80" height="80"></rect>
+        </g>
+        <path d="M28.0075352,66 L15.5907274,66 L29.3235885,37.296 L35.5460249,50.106 L28.0075352,66 Z M30.2196674,34.553 C30.0512768,34.208 29.7004629,33.989 29.3175745,33.989 L29.3145676,33.989 C28.9286723,33.99 28.5778583,34.211 28.4124746,34.558 L13.097944,66.569 C12.9495999,66.879 12.9706487,67.243 13.1550766,67.534 C13.3374998,67.824 13.6582439,68 14.0020416,68 L28.6420072,68 C29.0299071,68 29.3817234,67.777 29.5481094,67.428 L37.563706,50.528 C37.693006,50.254 37.6920037,49.937 37.5586944,49.665 L30.2196674,34.553 Z M64.9953491,66 L52.6587274,66 L32.866809,24.57 C32.7014253,24.222 32.3486067,24 31.9617091,24 L23.8899822,24 L23.8990031,14 L39.7197081,14 L59.4204149,55.429 C59.5857986,55.777 59.9386172,56 60.3255148,56 L64.9953491,56 L64.9953491,66 Z M65.9976745,54 L60.9599868,54 L41.25928,12.571 C41.0938963,12.223 40.7410777,12 40.3531778,12 L22.89768,12 C22.3453987,12 21.8963569,12.447 21.8953545,12.999 L21.884329,24.999 C21.884329,25.265 21.9885708,25.519 22.1780103,25.707 C22.3654452,25.895 22.6200358,26 22.8866544,26 L31.3292417,26 L51.1221625,67.43 C51.2885485,67.778 51.6393624,68 52.02626,68 L65.9976745,68 C66.5519605,68 67,67.552 67,67 L67,55 C67,54.448 66.5519605,54 65.9976745,54 L65.9976745,54 Z" id="Llambda_AWS-Lambda_Icon_64_Squid" fill="#FFFFFF"></path>
+    </g>
+</g>
+    <text x="1004" y="556" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="700" fill="#0F172A">AWS Lambda</text>
+    <text x="1004" y="584" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="500" fill="#64748B">Express API + Socket.IO</text>
+  </g><g>
+    <rect x="1305" y="409" width="268" height="208" rx="20" fill="#0f172a" opacity="0.10"/>
+    <rect x="1300" y="400" width="268" height="208" rx="20" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+    <rect x="1300" y="400" width="268" height="7" rx="3.5" fill="#3334B9"/>
+    <g transform="translate(1388 430) scale(1.15)">
+    <!-- Generator: Sketch 64 (93537) - https://sketch.com -->
+    <title>Icon-Architecture/64/Arch_Amazon-DynamoDB_64</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="Ldynamodb_linearGradient-1">
+            <stop stop-color="#2E27AD" offset="0%"></stop>
+            <stop stop-color="#527FFF" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Ldynamodb_Icon-Architecture/64/Arch_Amazon-DynamoDB_64" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Ldynamodb_Icon-Architecture-BG/64/Database" fill="url(#Ldynamodb_linearGradient-1)">
+            <rect id="Ldynamodb_Rectangle" x="0" y="0" width="80" height="80"></rect>
+        </g>
+        <path d="M52.0859525,54.8502506 C48.7479569,57.5490338 41.7449661,58.9752927 35.0439749,58.9752927 C28.3419838,58.9752927 21.336993,57.548042 17.9999974,54.8492588 L17.9999974,60.284515 L18.0009974,60.284515 C18.0009974,62.9952002 24.9999974,66.0163299 35.0439749,66.0163299 C45.0799617,66.0163299 52.0749525,62.9991676 52.0859525,60.290466 L52.0859525,54.8502506 Z M52.0869525,44.522272 L54.0869499,44.5113618 L54.0869499,44.522272 C54.0869499,45.7303271 53.4819507,46.8580436 52.3039522,47.8905439 C53.7319503,49.147199 54.0869499,50.3800499 54.0869499,51.257824 C54.0869499,51.263775 54.0859499,51.2687342 54.0859499,51.2746852 L54.0859499,60.284515 L54.0869499,60.284515 C54.0869499,65.2952658 44.2749628,68 35.0439749,68 C25.8349871,68 16.0499999,65.3071678 16.003,60.3192292 C16.003,60.31427 16,60.3093109 16,60.3043517 L16,51.2548485 C16,51.2528648 16.002,51.2498893 16.002,51.2469138 C16.005,50.3691398 16.3609995,49.1412479 17.7869976,47.8875684 C16.3699995,46.6358725 16.01,45.4149236 16.001,44.5440924 L16.002,44.5440924 C16.002,44.540125 16,44.5371495 16,44.5331822 L16,35.483679 C16,35.4807035 16.002,35.477728 16.002,35.4747525 C16.005,34.5969784 16.3619995,33.3690866 17.7879976,32.1173908 C16.3699995,30.8647031 16.01,29.6427623 16.001,28.7729229 L16.002,28.7729229 C16.002,28.7689556 16,28.7649882 16,28.7610209 L16,19.7125095 C16,19.709534 16.002,19.7065585 16.002,19.703583 C16.019,14.6997751 25.8199871,12 35.0439749,12 C40.2549681,12 45.2609615,12.8281823 48.7779569,14.2722941 L48.0129579,16.1052054 C44.7299622,14.7573015 40.0029684,13.9836701 35.0439749,13.9836701 C24.9999882,13.9836701 18.0009974,17.0047998 18.0009974,19.7174687 C18.0009974,22.4291458 24.9999882,25.4502754 35.0439749,25.4502754 C35.3149746,25.4532509 35.5799742,25.4502754 35.8479739,25.4403571 L35.9319738,27.4220435 C35.6359742,27.4339456 35.3399745,27.4339456 35.0439749,27.4339456 C28.3419838,27.4339456 21.336993,26.0066949 18,23.3079117 L18,28.7401923 L18.0009974,28.7401923 L18.0009974,28.7630046 C18.0109974,29.8034395 19.0779959,30.7119605 19.9719948,31.2892085 C22.6619912,33.0040913 27.4819849,34.1754485 32.8569778,34.4184481 L32.7659779,36.4001346 C27.3209851,36.1531677 22.5529914,35.0234675 19.4839954,33.2917235 C18.7279964,33.8570695 18.0009974,34.6217743 18.0009974,35.4886382 C18.0009974,38.2003153 24.9999882,41.2214449 35.0439749,41.2214449 C36.0289736,41.2214449 37.0069723,41.1887143 37.9519711,41.1232532 L38.0909709,43.1019642 C37.1009722,43.1704008 36.0749736,43.205115 35.0439749,43.205115 C28.3419838,43.205115 21.336993,41.7778644 18,39.0790811 L18,44.5113618 L18.0009974,44.5113618 C18.0109974,45.574609 19.0779959,46.4821381 19.9719948,47.060378 C23.0479907,49.0232196 28.8239831,50.2451604 35.0439749,50.2451604 L35.4839744,50.2451604 L35.4839744,52.2288305 L35.0439749,52.2288305 C28.7249832,52.2288305 22.9819908,51.0554896 19.4699954,49.0728113 C18.7179964,49.6371655 18.0009974,50.397903 18.0009974,51.257824 C18.0009974,53.9695011 24.9999882,56.9916225 35.0439749,56.9916225 C45.0799617,56.9916225 52.0749525,53.9744602 52.0859525,51.2647668 L52.0859525,51.2548485 L52.0859525,51.2538566 C52.0839525,50.391952 51.3639534,49.6312145 50.6099544,49.0668603 C50.1219551,49.3435823 49.5989558,49.6103859 49.0039566,49.8553692 L48.2379576,48.022458 C48.9639566,47.7239156 49.5939558,47.4015692 50.1109551,47.0623616 C51.0129539,46.4742034 52.0869525,45.5547723 52.0869525,44.522272 L52.0869525,44.522272 Z M60.6529412,30.0166841 L55.0489486,30.0166841 C54.717949,30.0166841 54.4069494,29.8540231 54.2219497,29.5822603 C54.0349499,29.3104975 53.99695,28.9643471 54.1189498,28.6598537 L57.5279453,20.1380068 L44.6189702,20.1380068 L38.6189702,32.0400276 L45.0009618,32.0400276 C45.3199614,32.0400276 45.619961,32.1917784 45.8089608,32.44668 C45.9959605,32.7025735 46.0509604,33.0308709 45.9539606,33.3333806 L40.2579681,51.089212 L60.6529412,30.0166841 Z M63.7219372,29.7121907 L38.7229701,55.539576 C38.5279703,55.7399267 38.2659707,55.8440694 38.000971,55.8440694 C37.8249713,55.8440694 37.6479715,55.7994368 37.4899717,55.7052124 C37.0899722,55.4691557 36.9069725,54.992083 37.0479723,54.5517083 L43.6339636,34.0236978 L37.0009724,34.0236978 C36.6539728,34.0236978 36.3329732,33.8461593 36.1499735,33.5535679 C35.9679737,33.2609766 35.9509737,32.8959813 36.1069735,32.5885124 L43.1069643,18.7028214 C43.2759641,18.3665893 43.6219636,18.1543366 44.0009631,18.1543366 L59.0009434,18.1543366 C59.331943,18.1543366 59.6429425,18.3179894 59.8279423,18.5887604 C60.0149421,18.861515 60.052942,19.2066736 59.9309422,19.5121588 L56.5219467,28.0330139 L62.9999381,28.0330139 C63.3999376,28.0330139 63.7629371,28.2710544 63.9199369,28.6360497 C64.0769367,29.0020368 63.9989368,29.4255504 63.7219372,29.7121907 L63.7219372,29.7121907 Z M19.4549955,60.6743062 C20.8719936,61.4727334 22.6559912,62.1442057 24.7569885,62.6678947 L25.2449878,60.7437346 C23.3459903,60.2706293 21.6859925,59.6497405 20.4429942,58.949505 L19.4549955,60.6743062 Z M24.7569885,46.7985335 L25.2449878,44.8753653 C23.3459903,44.4012681 21.6859925,43.7803794 20.4429942,43.0801438 L19.4549955,44.804945 C20.8719936,45.6033722 22.6549912,46.2748446 24.7569885,46.7985335 L24.7569885,46.7985335 Z M19.4549955,28.9355839 L20.4429942,27.2107827 C21.6839925,27.9110182 23.3449903,28.5309151 25.2449878,29.0060041 L24.7569885,30.9291723 C22.6529912,30.4044916 20.8699936,29.7330193 19.4549955,28.9355839 L19.4549955,28.9355839 Z" id="Ldynamodb_Amazon-DynamoDB_Icon_64_Squid" fill="#FFFFFF"></path>
+    </g>
+</g>
+    <text x="1434" y="556" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="700" fill="#0F172A">Amazon DynamoDB</text>
+    <text x="1434" y="584" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="500" fill="#64748B">boardDetails · sessionDetails</text>
+  </g><g>
+    <rect x="875" y="179" width="268" height="168" rx="20" fill="#0f172a" opacity="0.10"/>
+    <rect x="870" y="170" width="268" height="168" rx="20" fill="#fff" stroke="#E2E8F0" stroke-width="1.5"/>
+    <rect x="870" y="170" width="268" height="7" rx="3.5" fill="#DD344C"/>
+    <g transform="translate(967 200) scale(0.925)">
+    <!-- Generator: Sketch 64 (93537) - https://sketch.com -->
+    <title>Icon-Architecture/64/Arch_Amazon-Cognito_64</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="0%" y1="100%" x2="100%" y2="0%" id="Lcognito_linearGradient-1">
+            <stop stop-color="#BD0816" offset="0%"></stop>
+            <stop stop-color="#FF5252" offset="100%"></stop>
+        </linearGradient>
+    </defs>
+    <g id="Lcognito_Icon-Architecture/64/Arch_Amazon-Cognito_64" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Lcognito_Icon-Architecture-BG/64/Security-Identity-Compliance" fill="url(#Lcognito_linearGradient-1)">
+            <rect id="Lcognito_Rectangle" x="0" y="0" width="80" height="80"></rect>
+        </g>
+        <path d="M16.9635609,35.8079225 L29.8688192,35.8079225 L29.8688192,33.8253841 L16.9635609,33.8253841 L16.9635609,35.8079225 Z M61.3755183,50.2308895 L62.7792133,51.6325441 L55.4073327,58.9937093 C55.2127611,59.1870067 54.9586268,59.2841511 54.7054852,59.2841511 C54.4513509,59.2841511 54.1972166,59.1870067 54.0036377,58.9937093 L50.294865,55.2913188 L51.69856,53.8896641 L54.7054852,56.8912273 L61.3755183,50.2308895 Z M65.9439798,55.6937741 C65.7176414,57.5573602 64.9592093,59.29109 63.7471077,60.708605 C62.8864262,61.7157345 61.7994064,62.5484006 60.604181,63.1154066 C59.0009508,63.8757101 57.2200251,64.1641694 55.4460485,63.9480727 C53.7207147,63.7379237 52.0946522,63.057913 50.7396,61.9823859 C48.1367087,59.9155896 46.8223578,56.7108163 47.2224208,53.4088985 C47.6006441,50.2883831 49.4917608,47.5663578 52.2802893,46.127035 C53.6164799,45.4381029 55.0797377,45.0842198 56.5697987,45.0842198 C56.9519928,45.0842198 57.3371652,45.1080102 57.7213448,45.1545999 C60.8344902,45.534256 63.549558,47.4365016 64.9810489,50.2427847 C65.839745,51.9259598 66.1723036,53.8113538 65.9439798,55.6937741 L65.9439798,55.6937741 Z M66.750062,49.3437035 C65.0177793,45.9476152 61.731902,43.6458881 57.9615811,43.1869305 C55.6813213,42.9083838 53.4030468,43.3167868 51.3689796,44.3655496 C47.9957436,46.1062183 45.7085347,49.3982233 45.2508944,53.1709939 C44.7684363,57.1608525 46.3577685,61.0357238 49.5046661,63.5347135 C51.1456193,64.8372412 53.1171457,65.6609859 55.2048194,65.9157421 C55.6674233,65.9722445 56.1300272,66 56.5916383,66 C58.2713073,66 59.9301294,65.6292653 61.455928,64.9056388 C62.9023096,64.2196805 64.2176533,63.212551 65.2570229,61.9952724 C66.7232588,60.2803767 67.6425103,58.1838423 67.9155061,55.9316787 C68.1914801,53.6567158 67.788439,51.3787792 66.750062,49.3437035 L66.750062,49.3437035 Z M26.8906827,41.7555378 L30.8615314,41.7555378 L30.8615314,39.7729994 L26.8906827,39.7729994 L26.8906827,41.7555378 Z M16.9635609,41.7555378 L24.9052583,41.7555378 L24.9052583,39.7729994 L16.9635609,39.7729994 L16.9635609,41.7555378 Z M16.1058576,15.9825384 L60.5078879,15.9825384 C61.6773028,15.9825384 62.6283211,17.1393496 62.6283211,18.5608296 L62.6283211,25.8952305 L59.6501845,25.8952305 L59.6501845,20.9388844 C59.6501845,20.3917038 59.2064422,19.9476152 58.6574724,19.9476152 L35.8250923,19.9476152 C35.2761224,19.9476152 34.8323801,20.3917038 34.8323801,20.9388844 L34.8323801,25.8952305 L13.9854244,25.8952305 L13.9854244,18.5608296 C13.9854244,17.16314 14.9572896,15.9825384 16.1058576,15.9825384 L16.1058576,15.9825384 Z M47.256173,25.6077624 C49.5612507,25.6077624 51.436484,27.4614358 51.436484,29.7393725 C51.436484,31.2411453 50.6075693,32.6229746 49.2733642,33.3466011 C48.0066634,34.0335507 46.4798721,34.0246292 45.2300474,33.3475924 C43.9008058,32.6219833 43.075862,31.240154 43.075862,29.7393725 C43.075862,27.4614358 44.9501026,25.6077624 47.256173,25.6077624 L47.256173,25.6077624 Z M13.9854244,47.1083915 L13.9854244,27.8777689 L34.8323801,27.8777689 L34.8323801,44.7293454 C34.8323801,45.2775173 35.2761224,45.7206146 35.8250923,45.7206146 L46.2029054,45.7206146 L46.2029054,43.7380762 L37.9117733,43.7380762 C37.9981392,39.7710168 40.6357755,36.3441992 44.4338923,35.249838 C46.1890074,36.0696176 48.2846228,36.0775478 50.0665412,35.2488467 C52.2286683,35.8733463 54.1207777,37.3176255 55.2931708,39.2535743 L56.9917013,38.2266194 C55.7885342,36.2430897 53.9629365,34.6947272 51.8454814,33.7946548 C52.8381936,32.694346 53.4219083,31.2629532 53.4219083,29.7393725 C53.4219083,26.3680659 50.6552195,23.625224 47.256173,23.625224 C43.8561338,23.625224 41.0904377,26.3680659 41.0904377,29.7393725 C41.0904377,31.2570056 41.6681962,32.683442 42.6539593,33.7837508 C40.0004397,34.8999199 37.9276567,36.9924892 36.8178045,39.572763 L36.8178045,21.9301536 L57.6647602,21.9301536 L57.6647602,37.7904609 L59.6501845,37.7904609 L59.6501845,27.8777689 L62.6283211,27.8777689 L62.6293138,42.746807 L64.6147382,42.746807 L64.6137454,18.5608296 C64.6137454,16.0459796 62.7722643,14 60.5078879,14 L16.1058576,14 C13.8414811,14 12,16.0459796 12,18.5608296 L12,47.1083915 C12,49.6232415 13.8414811,51.6682298 16.1058576,51.6682298 L42.7740775,51.6682298 L42.7740775,49.6856914 L16.1058576,49.6856914 C14.9572896,49.6856914 13.9854244,48.5060811 13.9854244,47.1083915 L13.9854244,47.1083915 Z" id="Lcognito_Amazon-Cognito_Icon_64_Squid" fill="#FFFFFF"></path>
+    </g>
+</g>
+    <text x="1004" y="286" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="700" fill="#0F172A">Amazon Cognito</text>
+    <text x="1004" y="314" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="500" fill="#64748B">Auth · OAuth2 / OIDC</text>
+  </g>
+
+  <!-- how-it-works panel -->
+  <rect x="60" y="812" width="1564" height="352" rx="24" fill="#F8FAFC" stroke="#E2E8F0" stroke-width="1.5"/>
+  <text x="100" y="862" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="800" fill="#0F172A">How it works</text>
+  <text x="278" y="862" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="17" font-weight="500" fill="#94A3B8">— follow the numbered steps ① → ⑥ in the diagram above</text>
+  <g>
+      <circle cx="118" cy="902" r="19" fill="#D6242D" stroke="#fff" stroke-width="3"/>
+    <text x="118" y="909" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">1</text>
+      <text x="152" y="892" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="700" fill="#0F172A">Frontend delivery</text>
+      <text x="152" y="924" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16.5" font-weight="500" fill="#475569"><tspan x="152" dy="0">AWS Amplify builds and serves the React + Vite</tspan><tspan x="152" dy="24">single-page app over global HTTPS, with CI/CD on</tspan><tspan x="152" dy="24">every push.</tspan></text>
+    </g><g>
+      <circle cx="612.6666666666667" cy="902" r="19" fill="#DD344C" stroke="#fff" stroke-width="3"/>
+    <text x="612.6666666666667" y="909" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">2</text>
+      <text x="646.6666666666667" y="892" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="700" fill="#0F172A">Authentication</text>
+      <text x="646.6666666666667" y="924" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16.5" font-weight="500" fill="#475569"><tspan x="646.6666666666667" dy="0">The user signs in through Amazon Cognito (OAuth2 /</tspan><tspan x="646.6666666666667" dy="24">OIDC). The app receives a signed JWT access token.</tspan></text>
+    </g><g>
+      <circle cx="1107.3333333333335" cy="902" r="19" fill="#ED7100" stroke="#fff" stroke-width="3"/>
+    <text x="1107.3333333333335" y="909" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">3</text>
+      <text x="1141.3333333333335" y="892" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="700" fill="#0F172A">API requests</text>
+      <text x="1141.3333333333335" y="924" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16.5" font-weight="500" fill="#475569"><tspan x="1141.3333333333335" dy="0">The SPA calls the AWS Lambda backend (Express) with</tspan><tspan x="1141.3333333333335" dy="24">Axios, attaching the JWT as a Bearer token.</tspan></text>
+    </g><g>
+      <circle cx="118" cy="1030" r="19" fill="#DD344C" stroke="#fff" stroke-width="3"/>
+    <text x="118" y="1037" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">4</text>
+      <text x="152" y="1020" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="700" fill="#0F172A">Token verification</text>
+      <text x="152" y="1052" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16.5" font-weight="500" fill="#475569"><tspan x="152" dy="0">Lambda validates every JWT against Cognito public</tspan><tspan x="152" dy="24">keys before authorizing the request.</tspan></text>
+    </g><g>
+      <circle cx="612.6666666666667" cy="1030" r="19" fill="#3334B9" stroke="#fff" stroke-width="3"/>
+    <text x="612.6666666666667" y="1037" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">5</text>
+      <text x="646.6666666666667" y="1020" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="700" fill="#0F172A">Data persistence</text>
+      <text x="646.6666666666667" y="1052" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16.5" font-weight="500" fill="#475569"><tspan x="646.6666666666667" dy="0">Lambda reads and writes notes and whiteboard</tspan><tspan x="646.6666666666667" dy="24">sessions in Amazon DynamoDB via the AWS SDK.</tspan></text>
+    </g><g>
+      <circle cx="1107.3333333333335" cy="1030" r="19" fill="#0B0B0B" stroke="#fff" stroke-width="3"/>
+    <text x="1107.3333333333335" y="1037" text-anchor="middle" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="21" font-weight="800" fill="#fff">6</text>
+      <text x="1141.3333333333335" y="1020" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="700" fill="#0F172A">Realtime sync</text>
+      <text x="1141.3333333333335" y="1052" font-family="'Segoe UI', 'Helvetica Neue', Arial, sans-serif" font-size="16.5" font-weight="500" fill="#475569"><tspan x="1141.3333333333335" dy="0">Live edits stream over Socket.IO WebSockets through</tspan><tspan x="1141.3333333333335" dy="24">Lambda and broadcast to every session participant.</tspan></text>
+    </g>
+
+</svg>
